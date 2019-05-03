@@ -1,0 +1,57 @@
+= Getting started
+
+== Setting up Gitlab
+
+You will not be surprised to know that this entire workshop will be based on https://gitlab.com[, window="_blank"].
+
+If you already own a 🦊 account, you could ignore next step and jump directly to <<gitlab-repos>> section.
+
+=== Create your account
+
+To join the wonderful world of Gitlab, please go to https://gitlab.com/users/sign_in#register-pane[, window="_blank"].
+
+=== Generate and add your SSH key
+
+You need to generate and configure an SSH key for interacting with Gitlab from your machine.
+
+Please follow these two steps :
+
+- https://gitlab.com/help/ssh/README#generating-a-new-ssh-key-pair[Generate an SSH key, window="_blank"]
+- https://gitlab.com/help/ssh/README#adding-an-ssh-key-to-your-gitlab-account[Install an SSH key, window="_blank"]
+
+TIP: If you already get an existing key on your machine you could use it
+
+[#gitlab-repos]
+=== Organize your repos
+
+We have created a dedicated group for the workshop, it could be reached using https://gitlab.com/gke-training[, window="_blank"]
+
+Go to `DevFest Paris 2019` subgroup and click on `Request Access` button to join it. Now don't hesitate to ping us for your access to be granted.
+
+One your access is accepted, create a *public* project under group to define your workspace. You can use the first letter of your firstname concatenated to your lastname as project name (e.g `kdavin` or `lweber`).
+
+Go to project repository settings (`\https://gitlab.com/gke-training/devfest-paris-2019/*<username>*/settings/repository`) and click on `unprotect` orange button under `protected branches` section
+
+CAUTION: Joining the main group is important because some dedicated runners will be attached to it in case Gitlab.com ones fail.
+
+TIP: When an exercise is finished, you can move your project outside the workshop group to keep it in a personal namespace (`Settings -> General -> Transfer project`)
+
+[#kotlin]
+== Setting up Kotlin environment
+
+NOTE: Following instructions are not mandatory and useful only if you want to compile Kotlin code locally
+
+To make the workshop funnier and classier, we decided to use https://kotlinlang.org/[Kotlin, window="_blank"] as main language in exercises.
+
+*_You're totally newbie why Kotlin ?_*
+
+Don't worry, we'll drive you along exercises and code samples will be furnished to be focused on Gitlab C.I part 😉
+
+*_You hate Kotlin or Kotlin is so easy for you ?_*
+
+Increase difficulty and feel free to use another language for all the workshop !
+
+We encourage you to use the `IntelliJ IDEA` IDE in this community edition but you're free to use your preferred IDE.
+The following guide is perfect for getting started with Kotlin : https://kotlinlang.org/docs/tutorials/getting-started.html[, window="_blank"]
+
+Congratulations, you're now ready to start this workshop 🚀

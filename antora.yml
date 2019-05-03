@@ -1,0 +1,9 @@
+name: gke-training
+title: GKE Training
+version: '1.0.0'
+nav:
+- modules/getting-started/nav.adoc
+- modules/k8s-and-gke/nav.adoc
+- modules/istio/nav.adoc
+- modules/connecting-to-managed-services/nav.adoc
+start_page: ROOT:introduction.adoc

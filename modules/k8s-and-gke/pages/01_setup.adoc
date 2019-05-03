@@ -1,0 +1,74 @@
+= Getting started with Kubernetes
+
+
+== Summary
+
+Kubernetes is all about applications and in this section you will utilize the Kubernetes API to deploy, manage, and upgrade applications. In this part of the workshop you will use an example application called "app" to complete the chapters.
+
+https://github.com/kelseyhightower/app[App] is hosted on GitHub and provides an example 12 Facter application. During this workshop you will be working with the following Docker images:
+
+* https://hub.docker.com/r/kelseyhightower/monolith[kelseyhightower/monolith] - Monolith includes auth and hello services.
+* https://hub.docker.com/r/kelseyhightower/auth[kelseyhightower/auth] - Auth microservice. Generates JWT tokens for authenticated users.
+* https://hub.docker.com/r/kelseyhightower/monolith[kelseyhightower/hello] - Hello microservice. Greets authenticated users.
+* https://hub.docker.com/_/nginx[nginx] - Frontend to the auth and hello services.
+
+[#start-gke]
+== Create Kubernetes cluster on GKE
+
+You'll create a Kubernetes cluster using Google Kubernetes Engine web UI.
+
+Click the 3 bar menu - aka. the __Burger__ - on the upper-right corner of the GCP Console.
+
+When you mouse over the menu item __Kubernetes Engine__, a pin appear on the right. Click it to pin __Kubernetes Engine__ on top of the menu. You can do the same with __Compute Engine__ and __Container Registry__.
+
+image:gke-on-burger-menu.png[Burger menu opened on Kubernetes Engine]
+
+Then click on __Kubernetes Engine__ to open the list of GKE clusters.
+
+You don't have any cluster now. Click the __Create cluster__ button to open the cluster creation wizard. Choose a "Standard cluster".
+
+On the right part of the wizard:
+
+* Give your cluster the name *kube-cluster*
+* Choose `europe-west1-b` as Zone for this cluster (to have it closer to the user)
+* In the default-pool, choose `2 CPU` for the machine type. Keep 3 nodes.
+* Click the __Create__ button to create the cluster
+
+⏳ Wait until the cluster is fully started. It should takes 2-3 minutes.
+
+== Configure Kubernetes command-line client
+
+List Kubernetes clusters from Cloud Shell
+```shell
+gcloud container clusters list
+```
+
+`kubectl` is the command-line client for Kubernetes. It's a user interface to Kubernetes REST API's.
+Next command will generate a kube configuration for you (in `~/.kube/config`) to securely connect to your cluster with kubectl
+```shell
+gcloud container clusters get-credentials kube-cluster --zone=europe-west1-b
+```
+
+You can now list the nodes composing your cluster what is running inside it
+```shell
+kubectl get nodes
+kubectl get all
+```
+
+You have 3 nodes and a single service running in Kubernetes.
+This `service/kubernetes` resource is a service exposing the REST API of your Kubernetes cluster to the Pods, allowing them to execute `kubectl` commands if they want to (very few applications do that).
+
+You can also load kubeclt auto-competion for current bash
+```shell
+source <(kubectl completion bash)
+```
+You have to do it on each new shell or add it on your bash profile.
+
+That way, you'll be able to list kubectl commands with :
+```shell
+kubectl <Tab><Tab>
+```
+or
+```shell
+kubectl get p<Tab><Tab>
+```

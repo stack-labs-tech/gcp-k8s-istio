@@ -1,0 +1,4 @@
+[.intro_title]
+= GKE Training
+
+image::cover.png[]
