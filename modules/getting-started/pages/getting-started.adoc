@@ -1,57 +1,76 @@
 = Getting started
 
-== Setting up Gitlab
+== Prerequisites
 
-You will not be surprised to know that this entire workshop will be based on https://gitlab.com[, window="_blank"].
+[#knowledge]
+=== Knowledge
 
-If you already own a 🦊 account, you could ignore next step and jump directly to <<gitlab-repos>> section.
+* Be comfortable with the UNIX command line
+** navigating directories
+** editing files
+** a little bit of bash-fu (environment variables, loops)
 
-=== Create your account
+* Some Docker knowledge
+** `docker run`, `docker ps`, `docker build`
+** ideally, you know how to write a Dockerfile and build it (even if it's a `FROM` line and a couple of `RUN` commands)
+** It's totally OK if you are not a Docker expert!
 
-To join the wonderful world of Gitlab, please go to https://gitlab.com/users/sign_in#register-pane[, window="_blank"].
+[#resources]
+=== Resources
 
-=== Generate and add your SSH key
+* You need an access to a GCP project with activated billing
+* Your user should have sufficient access on GCP ressources such as :
+** ability to create a GKE cluster
+** ability to create a compute instances
+** ability to access, create and modify external services such as storage
+** ...
 
-You need to generate and configure an SSH key for interacting with Gitlab from your machine.
+[#gcloud_commands]
+=== Be able to issues `gcloud` commands
 
-Please follow these two steps :
+In order to issue all the commands of this workshop you should choose one of this solution:
 
-- https://gitlab.com/help/ssh/README#generating-a-new-ssh-key-pair[Generate an SSH key, window="_blank"]
-- https://gitlab.com/help/ssh/README#adding-an-ssh-key-to-your-gitlab-account[Install an SSH key, window="_blank"]
+. Use an existing installation Gcloud SDK and its `gcloud` cli
+. Use "Cloud Shell" tool on GCP console
 
-TIP: If you already get an existing key on your machine you could use it
+If you already have the `gcloud` cli installed, make sure you use the appropriate project by running :
 
-[#gitlab-repos]
-=== Organize your repos
+```bash
+gcloud projects list
+gcloud config set project ${YOUR_PROJECT}
+```
 
-We have created a dedicated group for the workshop, it could be reached using https://gitlab.com/gke-training[, window="_blank"]
+Otherwise if you don't have it install you can use GCP inner tool "Cloud Shell" :
 
-Go to `DevFest Paris 2019` subgroup and click on `Request Access` button to join it. Now don't hesitate to ping us for your access to be granted.
+* Connect to GCP console and select your project under the top navbar
+* Click on "Activate Cloud Shell"
 
-One your access is accepted, create a *public* project under group to define your workspace. You can use the first letter of your firstname concatenated to your lastname as project name (e.g `kdavin` or `lweber`).
+image:cloud-shell.png[Cloud Shell]
 
-Go to project repository settings (`\https://gitlab.com/gke-training/devfest-paris-2019/*<username>*/settings/repository`) and click on `unprotect` orange button under `protected branches` section
+Execute commands bellow to display your currrent account and project:
 
-CAUTION: Joining the main group is important because some dedicated runners will be attached to it in case Gitlab.com ones fail.
+```shell
+gcloud config list account
+gcloud config list project
+```
 
-TIP: When an exercise is finished, you can move your project outside the workshop group to keep it in a personal namespace (`Settings -> General -> Transfer project`)
+Set current project if it’s not yours project ID:
 
-[#kotlin]
-== Setting up Kotlin environment
+```shell
+gcloud config set project <project ID>
+```
 
-NOTE: Following instructions are not mandatory and useful only if you want to compile Kotlin code locally
+Set default region/zone:
 
-To make the workshop funnier and classier, we decided to use https://kotlinlang.org/[Kotlin, window="_blank"] as main language in exercises.
+```shell
+gcloud config set compute/region europe-west1
+gcloud config set compute/zone europe-west1-b
+```
 
-*_You're totally newbie why Kotlin ?_*
+Clone the workshop repository:
 
-Don't worry, we'll drive you along exercises and code samples will be furnished to be focused on Gitlab C.I part 😉
+```
+# TODO
+```
 
-*_You hate Kotlin or Kotlin is so easy for you ?_*
-
-Increase difficulty and feel free to use another language for all the workshop !
-
-We encourage you to use the `IntelliJ IDEA` IDE in this community edition but you're free to use your preferred IDE.
-The following guide is perfect for getting started with Kotlin : https://kotlinlang.org/docs/tutorials/getting-started.html[, window="_blank"]
-
-Congratulations, you're now ready to start this workshop 🚀
+Congratulations, you’re ready to start this workshop !!
