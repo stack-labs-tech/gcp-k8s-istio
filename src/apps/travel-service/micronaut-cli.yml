@@ -1,0 +1,5 @@
+profile: service
+defaultPackage: com.stack_labs.workshop
+---
+testFramework: junit
+sourceLanguage: kotlin
