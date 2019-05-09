@@ -1,6 +1,9 @@
 * **Part 1 : Kubernetes** ⚓️
 
-** xref:01_setup.adoc[1. Create cluster]
+** xref:01_setup.adoc#start-gke[1. Create cluster]
+*** xref:01_setup.adoc#create-from-gcp[Create from GCP]
+*** xref:01_setup.adoc#create-from-cli[Create from CLI]
+*** xref:01_setup.adoc#configure-cli[Configure CLI]
 ** xref:02_creating-and-managing-pods.adoc[2. Pods]
 ** xref:03_monitoring-and-health-checks.adoc[3. Monitoring apps]
 ** xref:04_managing-application-configurations-and-secrets.adoc[4. ConfigMaps & Secrets]

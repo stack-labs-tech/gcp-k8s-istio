@@ -4,3 +4,4 @@ build/
 
 gen/
 *.html
+.DS_Store

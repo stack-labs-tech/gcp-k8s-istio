@@ -70,7 +70,26 @@ gcloud config set compute/zone europe-west1-b
 Clone the workshop repository:
 
 ```
-# TODO
+git clone git@github.com:stack-labs-tech/gcp-k8s-istio.git
 ```
+
+[#microservices]
+== Get to know the microservices
+
+Kubernetes and Istio both aim at quicly and reliably deploying applications, and that's exactly what you will learn to do during this workshop. In order to do that we should first know what we are going to deploy during this entire workshop, it's time to meet the architecture !
+
+We will be using a set of microservices that generate dumb travels from one city to another and is able to display the list of travels done so far.
+
+Our microservices architecture looks like this :
+
+image:microservices-architecture.png[Microservices architecture]
+
+* *worker*: a background worker responsible for calling travel generation service and store generated travels to a Redis
+* *travel-service*: a service responsible for generating random travels
+* *distance-calculator*: a service responsible for calculating the distance between the city
+* *web-ui*: the web interface that will display the last accomplished travels.
+* *redis*: a https://redis.io/[Redis] store that will store all the travels manipulated by our microservices.
+
+Even if we won't explore the code of each microservice in this workshop, note that all the microservices have been developed using https://docs.micronaut.io/latest/guide/index.html[Micronaut framework].
 
 Congratulations, you’re ready to start this workshop !!

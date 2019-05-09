@@ -2,3 +2,4 @@
 ** xref:getting-started.adoc#knowledge[1. Knowledge]
 ** xref:getting-started.adoc#resources[2. Resources]
 ** xref:getting-started.adoc#gcloud_commands[3. Be able to issues `gcloud` commands]
+** xref:getting-started.adoc#microservices[4. Get to know the microservices]
