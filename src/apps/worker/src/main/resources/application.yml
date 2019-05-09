@@ -1,0 +1,11 @@
+---
+micronaut:
+    application:
+        name: worker
+
+travel-generator:
+    url: http://localhost:8081
+
+---
+redis:
+    uri: redis://localhost
