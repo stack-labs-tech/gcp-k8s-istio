@@ -52,7 +52,8 @@ shadowJar {
 run.jvmArgs('-noverify', '-XX:TieredStopAtLevel=1')
 
 mainClassName = "com.stack_labs.workshop.Application"
-jib.to.image = 'gcr.io/distance-calculator/jib-image'
+jib.from.image = 'gcr.io/distroless/java:debug'
+jib.to.image = 'stacklabs/distance-calculator:0.0.1-debug'
 
 test {
     useJUnitPlatform()

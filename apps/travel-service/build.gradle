@@ -53,7 +53,7 @@ shadowJar {
 run.jvmArgs('-noverify', '-XX:TieredStopAtLevel=1')
 
 mainClassName = "com.stack_labs.workshop.Application"
-jib.to.image = 'gcr.io/travel-service/jib-image'
+jib.to.image = 'stacklabs/travel-service'
 
 test {
     useJUnitPlatform()

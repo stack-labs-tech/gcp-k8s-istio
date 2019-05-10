@@ -1,0 +1,8 @@
+---
+micronaut:
+    application:
+        name: web-ui
+
+---
+redis:
+    uri: redis://localhost

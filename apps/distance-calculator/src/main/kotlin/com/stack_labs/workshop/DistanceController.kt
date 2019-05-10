@@ -16,6 +16,7 @@ class DistanceController() {
 
     // TODO Add a smarter calculation...
     @Get("/distance")
-    fun generateTravel(startPlace: String, endPlace: String): Single<Int> =
+    fun resolveDistance(from: String, to: String): Single<Int> =
             Single.just(random.nextInt(900) + 100)
+                    .doOnSuccess { dist -> LOG.info("Resolved distance between $from and $to : $dist km") }
 }
