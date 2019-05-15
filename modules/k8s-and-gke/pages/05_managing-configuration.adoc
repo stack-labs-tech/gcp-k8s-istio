@@ -1,0 +1,68 @@
+= Managing Configuration
+Many applications require configuration settings that might be a little bit more complex than just environment variables. For example an application might want to consume a config file to init itself. In this chapter you will learn how to:
+
+* Create configmaps to store application configuration data
+* Expose configmaps to Pods at runtime
+
+In this chapter we will deploy a new version of our existing `distance-calculator` microservice except that this time we will pass it a config map to give it the appropriate distances between the cities !
+
+[#configmaps]
+== Tutorial: Creating Configmaps
+
+Our `distance-calculator` has been developed to load some distances from a file which path is given in the environment variable : `DISTANCES_CONFIG_FILE`. We will use a configmap to pass this file to our containerized application.
+
+```
+kubectl create configmap distances-conf --from-file=manifests/app/distance-calculator/distances.json
+```
+
+Examine the `distances-conf` configmap:
+
+```
+kubectl describe configmaps distances-conf
+```
+
+=== Quiz
+
+* How many items are stored under the `distances-conf` configmap?
+* What are the key names?
+
+== Tutorial: Use Configmaps and Secrets
+
+In this tutorial you will expose the `distances-conf` configmap to the `distance-calculator` pod at runtime:
+
+Examine the `distance-calculator` pod configuration file:
+
+```
+cat manifests/app/pods/distance-calculator-with-distances.yaml
+```
+
+=== Quiz
+
+* How are secrets exposed to the `distance-calculator` Pod?
+* How are configmaps exposed to the `distance-calculator` Pod?
+
+Create the `distance-calculator` Pod using kubectl:
+
+```
+kubectl create -f manifests/app/pods/distance-calculator-with-distances.yaml
+```
+
+==== Test the HTTPS endpoint
+
+Forward local port 10080 to 8082 of the `distance-calculator` Pod:
+
+```
+kubectl port-forward distance-calculator-with-distances 10080:8082
+```
+
+Use the `curl` command to test the endpoint:
+
+```
+curl http://localhost:10080/distance?from=toulouse&to=paris
+```
+
+The application should now answer the real value (676 km) instead of a dumb, random value !
+
+== Summary
+
+Configmaps allow you to store application configuration data, then expose them to Pods at runtime. In this chapter you learned how to expose Configmaps to Pods using volume mounts.

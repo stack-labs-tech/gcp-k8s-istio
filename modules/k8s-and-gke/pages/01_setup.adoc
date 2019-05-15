@@ -42,11 +42,11 @@ Then create a Kubernetes cluster:
 
 ```shell
 gcloud container clusters create kube-cluster \
-    --machine-type n1-standard-1 \
+    --machine-type n1-standard-2 \
     --num-nodes 3
 ```
 
-NOTE: `--num-nodes` and `--machine-type` parameters are optional here because they set the default values (3 nodes clusters with n1-standard-1 machine for each node).
+NOTE: `--num-nodes` parameter is optional here because it matches the default values (3 nodes clusters).
 
 NOTE: We don't need to specify a region and a zone because GKE will deploy our new cluster in our project default region/zone.
 

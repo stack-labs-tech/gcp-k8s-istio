@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: distance-calculator-with-distances
+  labels:
+    app: distance-calculator-with-distances
+spec:
+  containers:
+    - name: distance-calculator-with-distances
+      image: stacklabs/distance-calculator:0.0.1
+      ports:
+        - name: http
+          containerPort: 8082
+      volumeMounts:
+          - name: "distances-conf"
+            mountPath: "/config"
+      resources:
+        limits:
+          cpu: 0.5
+          memory: "100Mi"
+      livenessProbe:
+        httpGet:
+          path: /probes/liveness
+          port: 8082
+          scheme: HTTP
+        initialDelaySeconds: 5
+        periodSeconds: 15
+        timeoutSeconds: 5
+      readinessProbe:
+        httpGet:
+          path: /probes/readiness
+          port: 8082
+          scheme: HTTP
+        initialDelaySeconds: 5
+        timeoutSeconds: 1
+      env:
+        - name: DISTANCES_CONFIG_FILE
+          value: /config/distances.json
+  volumes:
+    - name: "distances-conf"
+      configMap:
+        name: "distances-conf"
+        items:
+          - key: "distances.json"
+            path: "distances.json"

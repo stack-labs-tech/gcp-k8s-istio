@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: storage-writer
+  labels:
+    app: storage-writer
+  spec:
+    containers:
+      - name: storage-writer
+        image: stacklabs/storage-writer:0.0.1
+        volumeMounts:
+          - name: "api-key"
+            mountPath: "/api-key.json"
+        ports:
+          - name: http
+            containerPort: 8083
+        resources:
+          limits:
+            cpu: 0.5
+            memory: "100Mi"
+        env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /api-key.json
+    volumes:
+      - name: "api-key"
+        secret:
+          secretName: "gcs-admin-key"
