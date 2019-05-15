@@ -1,0 +1,28 @@
+
+== Intro
+
+[%step]
+* We are:
+** Olivier (@pommeDouze)
+** Kevin (@davinkevin)
+* The workshop will span on 3 days
+* Greatly inspired from Sfeir workshop and Jérôme Petazzoni trainings (❤️)
+
+=== What will we see ?
+
+* Kubernetes on GKE
+* Istio on top on Kubernetes
+* Integrate with "external" software
+
+=== Getting Started
+
+Load the workshop :
+
+https://github.com/stack-labs-tech/gcp-k8s-istio
+
+=== Practice time !
+
+Setup your environment :
+
+* Setup GCP project
+* Setup `gcloud` cli [optional]

@@ -1,21 +1,73 @@
 = Kubernetes and Istio on GCP: Workshop
 
-== Intro
+// Intro : setup GCP environment
+include::00_intro.adoc[]
+
+// Introduction to Kubernetes concepts
+// Creation of a Kubernetes cluster
+include::01_k8s_concepts.adoc[]
+
+// Introduction to Kubernetes overall architecture
+// (no practice)
+include::01_k8s_architecture.adoc[]
+
+// 01 - Pods and nodes
+// First deployments
+include::01_k8s_nodes_and_pods.adoc[]
+
+
+
+
+
+
+
+=== Resources: Services
+
+* Simple access to replicated pods.
+* A unique VIP by service. Routing and load balancing from the cluster.
+* DNS entries and env vars are created to ease access to services.
+* ClusterIP, NodePort, LoadBalancer (public IP).
+* Under the cover, ‘kubeproxy’ works with iptables and ipvs.
+
+[%notitle]
+=== K8S service access implementation
+
+image::images/k8s-service-access.png[background, size=contain]
+
+=== High Availability and Elasticity
+
+Cloud technologies allow for **five nine SLA** applications
+
+Production tools REALLY exist for that today (no more a dark research field)
+
+- Teams need to live by that new paradigm (no more “The system will be down at XXX for maintenance”)
+- Bring **new challenges** (no more blocking processes like DB migration)
+
+- K8s **Rolling updates** : manage application upgrades
+- K8s **Health and Readiness probes** : allows k8s to know the app state
+- K8s **Auto scaler** : react to application load and scale deployment
+
+Deploying a new version is **NOT AN EVENT**, we should deploy ten times a day on prod!
+
+
+=== Back to workshop !
+
+=== Let's recap !
 
 [%step]
-* We are:
-** Olivier (@pommeDouze)
-** Kevin (@davinkevin)
-* The workshop will span on 3 days
+* Running and scaling managed workloads is easy
+* Do not forget the readiness and liveness probes
+* Managed Kubernetes makes you not worrying about your nodes
+** auto updates
+** auto provisioning
 
-== What will we see ?
+=== But it is not always that easy !
 
-* Kubernetes on GKE
-* Istio on top on Kubernetes
-* Integrate with "external" software
-
-== Getting Started
-
-Load the workshop :
-
-https://github.com/stack-labs-tech/gcp-k8s-istio
+[%step]
+* What about **stateful** and shared-state workloads?
+* How do we manage continuous and automatic updates of the application code and dependencies (database schemas, storage buckets, service accounts, etc…)?
+* How do the new deployments workflows **fit with the company organization**?
+* How do we implement **CI**?
+* How do we **monitor**?
+* How do we **secure** our application?
+* What’s the **state** of a distributed application?
