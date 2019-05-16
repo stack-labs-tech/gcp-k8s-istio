@@ -1,12 +1,10 @@
 package com.stack_labs.workshop
-import com.fasterxml.jackson.module.kotlin.*
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.util.ClassUtil
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.micronaut.context.annotation.Value
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.util.*
 import javax.inject.Singleton
 
 @Singleton

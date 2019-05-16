@@ -1,0 +1,13 @@
+---
+micronaut:
+    application:
+        name: travel-manager
+    server:
+        port: 8081
+
+distance-calculator:
+    url: http://localhost:8082
+
+---
+redis:
+    uri: redis://localhost

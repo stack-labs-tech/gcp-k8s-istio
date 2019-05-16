@@ -1,8 +1,0 @@
-micronaut:
-    application:
-        name: travel-service
-    server:
-        port: 8081
-
-distance-calculator:
-    url: http://localhost:8082
