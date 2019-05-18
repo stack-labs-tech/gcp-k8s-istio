@@ -9,4 +9,7 @@ interface DistanceCalculatorClient {
 
     @Get("/distance?from={from}&to={to}")
     fun distance(from: String, to: String): Single<Int>
+
+    @Get("/who")
+    fun who(): Single<String>
 }
