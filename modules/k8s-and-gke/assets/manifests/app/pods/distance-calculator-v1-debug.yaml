@@ -11,8 +11,4 @@ spec:
       ports:
         - name: http
           containerPort: 8082
-      resources:
-        limits:
-          cpu: 0.5
-          memory: "100Mi"
 

@@ -84,10 +84,8 @@ Our microservices architecture looks like this :
 
 image:microservices-architecture.png[Microservices architecture]
 
-* *worker*: a background worker responsible for calling travel generation service and store generated travels to a Redis
-* *travel-service*: a service responsible for generating random travels
+* *travel-manager*: a service that has a background worker responsible for generating random travels, storing them to a Redis, and that also exposes endpoints to request travels
 * *distance-calculator*: a service responsible for calculating the distance between the city
-* *web-ui*: the web interface that will display the last accomplished travels.
 * *redis*: a https://redis.io/[Redis] store that will store all the travels manipulated by our microservices.
 
 Even if we won't explore the code of each microservice in this workshop, note that all the microservices have been developed using https://docs.micronaut.io/latest/guide/index.html[Micronaut framework].

@@ -1,0 +1,10 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: distance-calculator
+spec:
+  selector:
+    app: distance-calculator-with-distances
+  ports:
+    - protocol: TCP
+      port: 8082

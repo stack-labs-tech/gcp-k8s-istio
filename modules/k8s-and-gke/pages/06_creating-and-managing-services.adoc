@@ -1,38 +1,89 @@
 = Creating and Managing Services
 
-
 Services provide stable endpoints for Pods based on a set of labels.
 
-In this chapter you will create the `monolith` service and "expose" the `secure-monolith` Pod externally. You will learn how to:
+In this chapter we will add new _Pods_ to complete our microservices architecture, and we will create _Services_ to expose our _Pods_ internally and externally. As a recall we aim at deploying the following architecture:
+
+image:microservices-architecture.png[Microservices architecture]
+
+We will learn how to:
 
 * Create a service
-* Use label selectors to expose a limited set of Pods externally
+* Use label selectors to expose a limited set of Pods externally == Deploy our new pods
 
-== Tutorial: Create a Service
-
-Explore the monolith service configuration file:
+We first need to deploy the Redis backend before we can deploy the `travel-manager` :
 
 ```
-cat manifests/app/services/monolith.yaml 
+kubectl create -f manifests/app/pods/redis.yaml
 ```
 
-Create the monolith service using kubectl:
+== Tutorial: Creating services
+
+In order for our _Pods_ to communicate with each other we need to expose two of them:
+
+* `Redis` Pod should be exposed *inside the cluster* so `travel-manager` can use it to store/get travels
+* `distance-calculator` should be exposed *inside the cluster* so `travel-manager` can use it to retrieve distances.
+
+Additionaly, we will need to expose `travel-manager` Pod *externally*.
+
+[#internal]
+=== Internal services
+
+Explore `redis` service:
 
 ```
-kubectl create -f manifests/app/services/monolith.yaml
+cat manifests/app/services/redis.yaml
 ```
 
-Use the `gcloud compute firewall-rules` command to allow traffic to the `monolith` service:
+Create the redis service using kubectl:
 
 ```
-gcloud compute firewall-rules create allow-monolith-nodeport --allow=tcp:31000
+kubectl create -f manifests/app/services/redis.yaml
 ```
 
-== Exercise: Interact with the Monolith Service Remotely
+Do the same thing with the `distance-calculator` service:
 
-=== Hints
+```
+kubectl create -f manifests/app/services/distance-calculator.yaml
+```
 
-List the GCP VMs which compose the GKE cluster
+Just like we did with pods, we can look at created services using `kubectl` command:
+
+```
+kubectl get services
+```
+
+TIP: All resources have aliases so you can for example type `kubectl get svc` to get the list of existing services.
+
+==== Quizz
+
+* What type of services did we deploy ?
+
+[#nodeport]
+=== External service: NodePort
+
+So far we didn't specify any type for our 2 services, which means that they got the default value `ClusterIP` which only exposes the service on a cluster-internal IP as the
+https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types[doc specifies]:
+
+> `ClusterIP: Exposes the service on a cluster-internal IP. Choosing this value makes the service only reachable from within the cluster. This is the default `ServiceType`.
+
+To expose our `travel-manager` externally we will now deploy a service of type https://kubernetes.io/docs/concepts/services-networking/service/#nodeport[`NodePort`]:
+
+```
+cat manifests/app/services/travel-manager-nodeport.yaml
+```
+
+Now deploy this service:
+
+```
+kubectl create -f manifests/app/services/travel-manager-nodeport.yaml
+```
+
+==== Exercise: Interact with the Travel Manager Service Remotely
+
+===== Hints
+
+List the GCP VMs which compose the GKE cluster:
 ```
 gcloud compute instances list
 ```
@@ -40,9 +91,15 @@ gcloud compute instances list
 Output
 ```
 NAME                                           ZONE            MACHINE_TYPE   PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP     STATUS
-gke-istio-workshop-default-pool-e37360ba-369z  europe-west1-b  n1-standard-1               10.132.0.3   35.205.92.225   RUNNING
-gke-istio-workshop-default-pool-e37360ba-3hz4  europe-west1-b  n1-standard-1               10.132.0.2   35.240.127.238  RUNNING
-gke-istio-workshop-default-pool-e37360ba-8345  europe-west1-b  n1-standard-1               10.132.0.4   35.233.127.229  RUNNING
+gke-kube-cluster-default-pool-25c90f6c-nlft  europe-west1-b  n1-standard-2               10.132.0.12  35.195.16.10    RUNNING
+gke-kube-cluster-default-pool-25c90f6c-pl74  europe-west1-b  n1-standard-2               10.132.0.14  104.155.52.100  RUNNING
+gke-kube-cluster-default-pool-25c90f6c-s71s  europe-west1-b  n1-standard-2               10.132.0.13  35.240.56.74    RUNNING
+```
+
+On GCE you need to add a firewall rule to enable Ingress traffic (i.e. traffic from anywhere to your GCP project):
+
+```
+gcloud compute firewall-rules create travel-manager-service --allow tcp:31000
 ```
 
 Then use any of the `External IP` to connect to the NodePort
@@ -50,60 +107,61 @@ Then use any of the `External IP` to connect to the NodePort
 curl -k https://<EXTERNAL_IP>:31000
 ```
 
-=== Quiz
+===== Quiz
 
-* Why are you unable to get a response from the `monolith` service? __(answer below)__
+* Why are you unable to get a response from the `travel-manager` service? __(answer below)__
 
-== Exercise: Explore the monolith Service
+==== Exercise: Explore the `travel-manager` Service
 
-=== Hints
-
-```
-kubectl get services monolith
-```
+===== Hints
 
 ```
-kubectl describe services monolith
-```
-
-=== Quiz
-
-* How many endpoints does the `monolith` service have?
-* What labels must a Pod have to be picked up by the `monolith` service?
-
-== Tutorial: Add Labels to Pods
-
-Currently the `monolith` service does not have any endpoints. One way to troubleshoot an issue like this is to use the `kubectl get pods` command with a label query.
-
-```
-kubectl get pods -l "app=monolith"
+kubectl get services travel-manager
 ```
 
 ```
-kubectl get pods -l "app=monolith,secure=enabled"
+kubectl describe services travel-manager
+```
+
+===== Quiz
+
+* How many endpoints does the `travel-manager` service have?
+* What labels must a Pod have to be picked up by the `travel-manager` service?
+
+[#labels]
+==== Tutorial: Add Labels to Pods
+
+Currently the `travel-manager` service does not have any endpoints. One way to troubleshoot an issue like this is to use the `kubectl get pods` command with a label query.
+
+```
+kubectl get pods -l "app=travel-manager
+```
+
+```
+kubectl get pods -l "app=travel-manager,version=1""
 ```
 
 > Notice this label query does not print any results
 
-Use the `kubectl label` command to add the missing `secure=enabled` label to the `secure-monolith` Pod.
+Use the `kubectl label` command to add the missing `version=1` label to the `travel-manager` Pod.
 
 ```
-kubectl label pods secure-monolith 'secure=enabled'
+kubectl label pods travel-manager 'version=1'
 ```
 
-View the list of endpoints on the `monolith` service:
+View the list of endpoints on the `travel-manager` service:
 
 ```
-kubectl describe services monolith
+kubectl describe services travel-manager
 ```
 
-=== Quiz
+===== Quiz
 
-* How many endpoints does the `monolith` service have?
+* How many endpoints does the `travel-manager` service have?
 
-== Exercise: Interact with the Monolith Service Remotely
+==== Exercise: Interact with the Travel Manager Service Remotely
 
-=== Hints
+===== Hints
 
 ```
 gcloud compute instances list
@@ -113,25 +171,67 @@ gcloud compute instances list
 curl -k https://<EXTERNAL_IP>:31000
 ```
 
-== Tutorial: Remove Labels from Pods
+==== Tutorial: Remove Labels from Pods
 
 In this exercise you will observe what happens when a required label is removed from a Pod.
 
-Use the `kubectl label` command to remove the `secure` label from the `secure-monolith` Pod.
+Use the `kubectl label` command to remove the `type` label from the `travel-manager` Pod.
 
 ```
-kubectl label pods secure-monolith secure-
+kubectl label pods travel-manager type-
 ```
 
-View the list of endpoints on the `monolith` service:
+View the list of endpoints on the `travel-manager` service:
 
 ```
-kubectl describe services monolith
+kubectl describe services travel-manager
 ```
 
-=== Quiz
+===== Quiz
 
-* How many endpoints does the `monolith` service have?
+* How many endpoints does the `travel-manager` service have?
+
+[#lb]
+=== External service: Load Balancer
+
+`NodePort` services are great but they are usually not used directly in production as they require that you type on a specific cluster's node to access your microservices.
+
+We usually use a `LoadBalancer` service type instead, and GKE will manage everything for us. Let's try that. We first need to delete the old service:
+
+```
+kubectl delete svc travel-manager
+```
+
+Observe the new service with `LoadBalancer`:
+
+```
+cat manifests/app/services/travel-manager-nodeport.yaml
+```
+
+TIP: What is the difference with the `NodePort` version ?
+
+We are now ready to create our `LoadBalancer` service:
+
+```
+kubectl create -f manifests/app/services/travel-manager-nodeport.yaml
+```
+
+Wait until a stable external IP address has been assigned to our LoadBalancer by running the following command:
+
+```
+watch kubectl get svc travel-manager --output yaml
+```
+
+Once you have a value under status.loadBalancer.ingress.ip`, you can query the `travel-manager` service from the outside world by running a simple curl:
+
+```
+curl http://<INGRESS_IP>:60000/travels
+```
+
+==== Quizz
+
+* How was the load balancer populated in GCP environment ?
+* How was the service able to reach the container in our pods ?
 
 == Summary
 

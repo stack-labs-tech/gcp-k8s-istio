@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: travel-manager
+  labels:
+    app: travel-manager
+    version: "1"
+spec:
+  containers:
+    - name: travel-manager
+      image: stacklabs/travel-manager:0.0.3
+      ports:
+        - name: http
+          containerPort: 8081
+      env:
+        - name: "REDIS_HOST"
+          value: "standalone-redis"
+        - name: "DISTANCE_CALCULATOR_URL"
+          value: "http://distance-calculator:8082"
+

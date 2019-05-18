@@ -14,10 +14,6 @@ spec:
       volumeMounts:
           - name: "distances-conf"
             mountPath: "/config"
-      resources:
-        limits:
-          cpu: 0.5
-          memory: "100Mi"
       livenessProbe:
         httpGet:
           path: /probes/liveness

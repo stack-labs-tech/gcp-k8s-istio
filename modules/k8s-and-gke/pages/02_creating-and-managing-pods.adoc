@@ -7,25 +7,47 @@ image::k8s-pods-and-nodes.png[]
 
 In this chapter we will learn how to:
 
+* Execute a simple `run` command
 * Write a Pod configuration file
 * Create and inspect Pods 
 * Interact with Pods remotely using kubectl
 
-In this chapter we will create the first Pod of our microservices architecture : the `distance-calculator` Pod. We will also use kubectl command line tool to interact with our Pod.
+In this chapter we will run a very simple nginx Pod and we will create the very first Pod of our microservices architecture : the `distance-calculator` Pod. We will also use `kubectl` command line tool to interact with our Pod.
 
-== Tutorial: Creating Pods
+[#from-run]
+== Tutorial: Creating Pod with run command
 
-Explore the `distance-calculator` pod configuration file:
+Wait, you told us that everything was yaml, yet we can run a container in Kubernetes without using yaml ?
 
-```shell
-cat manifests/app/pods/distance-calculator-v1-debug.yaml
-```
-
-Create the `distance-calculator` pod using kubectl:
+Well, kind of. Just like you can do a `docker run` to launch a docker image, we can use the `kubectl run` to run a container image on a distant Kubernetes cluster. Let's create our very first pod on our cluster by deploying a `nginx` server:
 
 ```shell
-kubectl create -f manifests/app/pods/distance-calculator-v1-debug.yaml
+kubectl run nginx --image=nginx --port=80 --replicas=1
 ```
+
+What happened here ? We just asked Kubernetes to "deploy" a container image named `nginx`, which resulted in Kubernetes doing the following things:
+* Create a deployment named `nginx` asking to create 1 replica (= 1 pod) of our image
+* Create a pod with our `nginx` container image
+* Make the pod's nginx container expose the port 80
+
+You can verify this by asking all the resources existing on Kubernetes cluster:
+
+```shell
+kubectl get all
+```
+
+You can also ask for a description of the deployment:
+```shell
+kubectl describe deployment nginx
+```
+
+And a description of the pod:
+
+```shell
+kubectl describe pod <POD_NAME>
+```
+
+So far we have a running container in our distance cluster but we are unable to access it... back on this later !
 
 == Exercise: View Pod details
 
@@ -39,6 +61,23 @@ kubectl get pods
 
 ```shell
 kubectl describe pods <pod-name>
+```
+
+[#from-yaml]
+== Tutorial: Creating Pod from yaml file
+
+Using `kubectl run` command is pretty simple and sometimes useful to quickly deploy a simple container such as a shell container to debug something in the cluster, it gets rather hard to write as we want to add more parameters such as environment variables, mount volumes or other advanced stuff.
+
+We will now create a Pod from a Yaml configuration file. First explore the `distance-calculator` pod configuration file:
+
+```shell
+cat manifests/app/pods/distance-calculator-v1-debug.yaml
+```
+
+Create the `distance-calculator` pod using kubectl:
+
+```shell
+kubectl create -f manifests/app/pods/distance-calculator-v1-debug.yaml
 ```
 
 === Quiz
@@ -56,6 +95,14 @@ Pods are allocated a private IP address by default and cannot be reached outside
 === Hints
 
 Use two Cloud Shell terminals. One to run the `kubectl port-forward` command, and the other to issue `curl` commands.
+
+```shell
+kubectl port-forward <POD_NAME> 10081:80
+```
+
+Open your browser and point it to `localhost:10081` or type in the curl command : `curl "http://localhost:10081` to see Nginx default homepage !
+
+Similarly with our `distance-calculator` Pod:
 
 ```shell
 kubectl port-forward distance-calculator 10080:8082
