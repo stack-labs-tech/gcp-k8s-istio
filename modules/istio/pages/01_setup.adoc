@@ -1,117 +1,109 @@
-= Setup Istio
+= Installing a GKE cluster with Istio
 
 
 [#summary]
 == Summary
-In this lab, you will learn how to install and configure Istio, on _Google Kubernetes Engine_.
+In this step, we will install a cluster with a managed version of Istio in Google Kubernetes Engine (GKE)
+All the tasks of this step can be done inside Google Cloud Shell or in your computer.
 
-[IMPORTANT]
-.Before you begin, make sure that:
-====
-- You already created a GCP project and the envrionement variable ``$PROJECT_ID`` is set.
-- You already cloned the directory : ``https://github.com/Sfeir/kubernetes-istio-workshop`` and all operations must take place into the root of the ``kubernetes-istio-workshop`` directory.
-====
+[#cluster-creation]
+== Create the GKE Cluster with Istio
+
+[#cluster-creation-from-ui]
+=== From the UI
+
+You can create the cluster from UI, following those steps:
+
+1. Open cluster pages on Google Cloud Console
++
+image:setup/01_go-to-gke-cluster-page.png[Open cluster pages on Google Cloud Console]
+
+2. Click on create cluster
++
+image:setup/02_click-on-create-cluster.png[Click on create cluster]
+
+3. Name the cluster, choose version of GKE and select 2vCPU / 7,5Gb of ram machine type
++
+image:setup/03_fill-form-01.png[fill form cluster creation 01]
+
+4. In advanced settigs, choose to use VPC Native and follow the parameters in the capture
++
+image:setup/04_fill-form-02.png[fill form cluster creation 02]
+
+5. Enable the multiple stack-driver options (Logging, Monitoring, and the new beta version) like in the capture
++
+image:setup/05_fill-form-03.png[fill form cluster creation 03]
+
+6. Finally, enable the Istio module with permissive mode like in the capture
++
+image:setup/06_fill-form-04.png[fill form cluster creation 04]
 
 
+[#cluster-creation-from-cli]
+=== From the CLI
 
-[#prerequisites]
-== Prerequisites
+You can create the cluster with the following comamnd:
 
-You will install Istio with https://cloud.google.com/deployment-manager/docs/[Google Cloud Deployment Manager] an automation tool for deploying cloud resources.
+Important: Don't forget to set your default project before running this command
 
-[IMPORTANT]
-.to avoid loosing your settings after closing your cloudshell console you can store your different settings and variables into the ~.bashrc file which is loaded for each cloudshell session.
-====
-====
-
-[#deploy-istio]
-== Deploy Istio
-
-[IMPORTANT]
-.Remember !
-====
-- All the commands must be run in the ``kubernetes-istio-workshop`` directory.
-====
-
-[source, bash]
+[source,bash]
 ----
-gcloud services enable runtimeconfig.googleapis.com
-
-gcloud deployment-manager deployments create istio-cluster --config=src/infrastructure/istio/gcp/deployment_manager/istio-cluster.yaml
+gcloud beta container clusters create "istio-formation" \
+--zone "europe-north1-a" \
+--no-enable-basic-auth \
+--cluster-version "1.13.5-gke.10" \
+--machine-type "n1-standard-2" \
+--image-type "COS" \
+--disk-type "pd-standard" \
+--disk-size "100" \
+--metadata disable-legacy-endpoints=true \
+--scopes "https://www.googleapis.com/auth/devstorage.read_only","https://www.googleapis.com/auth/logging.write","https://www.googleapis.com/auth/monitoring","https://www.googleapis.com/auth/servicecontrol","https://www.googleapis.com/auth/service.management.readonly","https://www.googleapis.com/auth/trace.append" \
+--num-nodes "4" \
+--enable-stackdriver-kubernetes \
+--enable-ip-alias \
+--network "projects/istio-csm/global/networks/default" \
+--subnetwork "projects/istio-csm/regions/europe-north1/subnetworks/default" \
+--default-max-pods-per-node "110" \
+--addons HorizontalPodAutoscaling,HttpLoadBalancing,Istio \
+--istio-config auth=MTLS_PERMISSIVE \
+--enable-autoupgrade \
+--enable-autorepair
 ----
 
-By default the tool creates a kubernetes cluster with the specified settings in the https://github.com/Sfeir/kubernetes-istio-workshop/blob/master/src/infrastructure/istio/gcp/deployment_manager/istio-cluster.yaml[istio-cluster.yaml] file, then installs the Istio control plane, https://istio.io/docs/tasks/telemetry/using-istio-dashboard/[Grafana] with https://istio.io/docs/tasks/telemetry/querying-metrics/[Prometheus], https://istio.io/docs/tasks/telemetry/servicegraph/[ServiceGraph], and https://istio.io/docs/tasks/telemetry/distributed-tracing/[Tracing]. You’ll find out more about how to access all of these in the next lab.
-
-⏳ Wait until Istio is fully deployed. Note that the Istio installation can take up to five minutes.
-
-Output.
-
-[source, bash]
-----
-The fingerprint of the deployment is 2_hGqA74DjtdLmJDsXp5jg==
-Waiting for update [operation-1540035229383-578a764c9f958-7310630b-4488428e]...done.
-Update operation operation-1540035229383-578a764c9f958-7310630b-4488428e completed successfully.
-NAME                                TYPE                          STATE      ERRORS  INTENT
-istio-cluster                       container.v1.cluster          COMPLETED  []
-istio-cluster-istio-cluster-config  runtimeconfig.v1beta1.config  COMPLETED  []
-istio-cluster-istio-cluster-vm      compute.v1.instance           COMPLETED  []
-istio-cluster-istio-cluster-waiter  runtimeconfig.v1beta1.waiter  COMPLETED  []
-----
-
-[#connect-cluster]
+[#connect-to-cluster]
 == Connect to the cluster
 
-Once the deployment is complete, do the following on Cloud Shell :
+The cluster creation will take few minutes. Then, after the creation is complete, you have to `connect` to it.
+To do so, you have to click on the `connect` button in the Google Cloud Console, in the list of clusters.
 
-1 - Bootstrap ``kubectl`` for the cluster you just created and confirm the cluster is running and Istio is enabled
-[source, bash]
-----
-gcloud container clusters list --zone europe-west1-b
-----
+image:setup/07-connect-to-cluster-01.png[choose cluster to connect to]
 
-Output.
-[source, bash]
-----
-NAME           LOCATION        MASTER_VERSION  MASTER_IP      MACHINE_TYPE   NODE_VERSION  NUM_NODES  STATUS
-istio-cluster  europe-west1-b  1.9.7-gke.6     35.195.237.45  n1-standard-1  1.9.7-gke.6   3          RUNNING
-----
+Then, you can copy/paste the command line to your CLI or execute it directly inside the Google Cloud Shell.
 
-2 - Finally, acquire the credentials to connect to the cluster.
+image:setup/08-connect-to-cluster-02.png[execute the command displayed in the UI]
 
-[source, bash]
-----
-gcloud container clusters get-credentials istio-cluster --region europe-west1-b
-----
+[#check-installation]
+== Check the installation
 
-[#verify-installation]
-== Verify installation
+We will in this step see what have been configured by Google for your through Istio for GKE
 
-Let's get the deployments (you can also get pods, services, etc.)
+=== The Istio namespace
 
-⚠️ Do not forget to specify the Istio's namespace (``-n istio-system``).
+Run the following command to see what is present in the `istio-system` namespace
 
 [source, bash]
 ----
-kubectl get deployments -n istio-system
+Λ\:$ kubectl get services -n istio-system
+  NAME                     TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)                                                                                                                   AGE
+  istio-citadel            ClusterIP      10.121.14.33   <none>          8060/TCP,9093/TCP                                                                                                         13m
+  istio-egressgateway      ClusterIP      10.121.0.254   <none>          80/TCP,443/TCP                                                                                                            13m
+  istio-galley             ClusterIP      10.121.3.68    <none>          443/TCP,9093/TCP                                                                                                          13m
+  istio-ingressgateway     LoadBalancer   10.121.0.110   35.228.82.117   80:31122/TCP,443:31260/TCP,31400:30822/TCP,15011:31100/TCP,8060:32306/TCP,853:32455/TCP,15030:31345/TCP,15031:30823/TCP   13m
+  istio-pilot              ClusterIP      10.121.13.81   <none>          15010/TCP,15011/TCP,8080/TCP,9093/TCP                                                                                     13m
+  istio-policy             ClusterIP      10.121.9.214   <none>          9091/TCP,15004/TCP,9093/TCP                                                                                               13m
+  istio-sidecar-injector   ClusterIP      10.121.15.71   <none>          443/TCP                                                                                                                   13m
+  istio-telemetry          ClusterIP      10.121.5.223   <none>          9091/TCP,15004/TCP,9093/TCP,42422/TCP                                                                                     13m
+  promsd                   ClusterIP      10.121.7.250   <none>          9090/TCP                                                                                                                  13m
 ----
 
-Output.
-[source, bash]
-----
-NAME                       DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-grafana                    1         1         1            1           3h
-istio-citadel              1         1         1            1           3h
-istio-egressgateway        1         1         1            1           3h
-istio-galley               1         1         1            1           3h
-istio-ingressgateway       1         1         1            1           3h
-istio-pilot                1         1         1            1           3h
-istio-policy               1         1         1            1           3h
-istio-sidecar-injector     1         1         1            1           3h
-istio-statsd-prom-bridge   1         1         1            1           3h
-istio-telemetry            1         1         1            1           3h
-istio-tracing              1         1         1            1           3h
-prometheus                 1         1         1            1           3h
-servicegraph               1         1         1            1           3h
-----
-
-- Congratulations, you finished the lab !
+Here, you see the external IP of your cluster, which is in this case, *35.228.82.117*

@@ -1,33 +1,11 @@
 * **Istio** ⛵️
 
-** xref:01_setup.adoc[1. Setup]
-*** xref:01_setup.adoc#prerequisites[Prerequisites]
-*** xref:01_setup.adoc#deploy-istio[Deploy Istio]
-*** xref:01_setup.adoc#connect-cluster[Connect to the cluster]
-*** xref:01_setup.adoc#verify-installation[Verify installation]
-
-** xref:02_deploy-microservices.adoc[2. Deploy Microservices]
-*** xref:02_deploy-microservices.adoc#deploycustomer[Deploy Customer]
-*** xref:02_deploy-microservices.adoc#expose-customer[Expose Customer]
-*** xref:02_deploy-microservices.adoc#deploypreference[Deploy Preference]
-*** xref:02_deploy-microservices.adoc#deployrecommendation[Deploy Recommendation]
-
-** xref:03_monitoring-tracing.adoc[3. Monitoring and Tracing]
-*** xref:03_monitoring-tracing.adoc#monitoring[Monitoring]
-*** xref:03_monitoring-tracing.adoc#tracing[Tracing]
-
-** xref:04_simple-routerules.adoc[4. Simple Routing]
-*** xref:04_simple-routerules.adoc#deployrecommendationv2[Deploy Recommendation V2]
-*** xref:04_simple-routerules.adoc#istiorouting[Changing Istio Routings]
-**** xref:04_simple-routerules.adoc#alltorecommendationv2[All the traffic to recommendation:v2]
-**** xref:04_simple-routerules.adoc#alltorecommendationv1[Al the traffic to recommendation:v1]
-**** xref:04_simple-routerules.adoc#alltorecommendationv1v2[All Users To Recommendation V1 and V2]
-**** xref:04_simple-routerules.adoc#canarydeploymentrecommendation[Canary Deployment Between v1 And v2]
-
-** xref:05_advanced-routerules.adoc[5. Advanced Routing]
-*** xref:05_advanced-routerules.adoc#traffic-steering[Traffic Steering]
-*** xref:05_advanced-routerules.adoc#loadbalancer[Load Balancer]
-*** xref:05_advanced-routerules.adoc#ratelimiting[Rate Limiting]
+**      xref:01_setup.adoc[1. Setup]
+***     xref:01_setup.adoc#summary[Summary]
+***     xref:01_setup.adoc#cluster-creation[Create the Cluster]
+****    xref:01_setup.adoc#cluster-creation-from-ui[From the UI]
+****    xref:01_setup.adoc#cluster-creation-from-cli[From the CLI]
+***     xref:01_setup.adoc#connect-to-cluster[Connect to the cluster]
 
 ** xref:06_fault-injection.adoc[6. Fault Injection]
 *** xref:06_fault-injection.adoc#503error[HTTP 503 Error]
