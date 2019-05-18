@@ -1,0 +1,24 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: travel-manager
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: travel-manager
+        version: v1
+    spec:
+      containers:
+        - name: travel-manager
+          image: stacklabs/travel-manager:0.0.3
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8081
+          env:
+            - name: "REDIS_HOST"
+              value: "standalone-redis"
+            - name: "DISTANCE_CALCULATOR_URL"
+              value: "http://distance-calculator:8082"

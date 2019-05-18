@@ -12,12 +12,16 @@ include::01_k8s_concepts.adoc[]
 include::01_k8s_architecture.adoc[]
 
 // 01 - Pods and nodes
-// First deployments
+// First deployments of pods
 include::01_k8s_nodes_and_pods.adoc[]
 
 // 01 - Services
 // Creation of a service
 include::01_k8s_services.adoc[]
+
+// 01 - Deployments
+// Creation of multiple deployments
+include::01_k8s_deployments.adoc[]
 
 
 === High Availability and Elasticity

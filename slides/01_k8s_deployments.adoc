@@ -1,0 +1,13 @@
+
+=== Resources: Deployment
+
+* Specification of a Pod template together with the replication strategy.
+* Controls the amount of Replication.
+* Manages rolling updates.
+* Software and replication upgrades is a simple “kubectl deployment edit”.
+[%notitle]
+
+=== Practice time !
+
+Manage and scale `Pods` with `Deployments`
+

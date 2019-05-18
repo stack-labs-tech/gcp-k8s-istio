@@ -77,7 +77,7 @@ cat manifests/app/pods/distance-calculator-v1-debug.yaml
 Create the `distance-calculator` pod using kubectl:
 
 ```shell
-kubectl create -f manifests/app/pods/distance-calculator-v1-debug.yaml
+kubectl apply -f manifests/app/pods/distance-calculator-v1-debug.yaml
 ```
 
 === Quiz

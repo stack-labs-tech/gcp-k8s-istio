@@ -8,6 +8,7 @@ metadata:
     containers:
       - name: storage-writer
         image: stacklabs/storage-writer:0.0.1
+        imagePullPolicy: Always
         volumeMounts:
           - name: "api-key"
             mountPath: "/api-key.json"

@@ -15,6 +15,6 @@
 *** xref:06_creating-and-managing-services.adoc#nodeport[External service: NodePort]
 *** xref:06_creating-and-managing-services.adoc#labels[Labels]
 *** xref:06_creating-and-managing-services.adoc#lb[External service: LoadBalancer]
-** xref:07_creating-and-managing-deployments.adoc[7. Deployments]
+** xref:07_creating-and-managing-deployments.adoc[7. Deployments & Scaling]
 ** xref:08_rolling-out-updates.adoc[8. Rolling-upgrade]
 ** xref:09_cleanup.adoc[9. Cleanup]

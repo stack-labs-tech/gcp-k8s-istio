@@ -4,7 +4,7 @@ metadata:
   name: distance-calculator
 spec:
   selector:
-    app: distance-calculator-with-distances
+    app: distance-calculator
   ports:
     - protocol: TCP
       port: 8082

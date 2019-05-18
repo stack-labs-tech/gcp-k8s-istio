@@ -16,7 +16,7 @@ Both readiness and liveness probes run on the container during the entire contai
 |Container crashed: restart it
 |===
 
-In this chapter you will deploy a new Pod named `distance-calculator-with-distances`, which is largely based on the `distance-calculator` Pod with the addition of readiness and liveness probes.
+In this chapter you will deploy a new `distance-calculator` _Pod_ which is largely based on the previous Pod, with the addition of readiness and liveness probes.
 
 In this chapter you will learn how to:
 
@@ -25,21 +25,21 @@ In this chapter you will learn how to:
 
 == Tutorial: Creating Pods with Liveness and Readiness Probes
 
-Explore the `distance-calculator-with-distances` pod configuration file:
+Explore the `distance-calculator` pod configuration file:
 
 ```
-cat manifests/app/pods/distance-calculator-with-distances.yaml
+cat manifests/app/pods/distance-calculator-with-probes.yaml
 ```
 
-Create the `distance-calculator-with-distances` pod using kubectl:
+Create the new `distance-calculator` pod using kubectl:
 
 ```
-kubectl create -f manifests/app/pods/distance-calculator-with-distances.yaml
+kubectl apply -f manifests/app/pods/distance-calculator-with-probes.yaml
 ```
 
 == Exercise: View Pod details
 
-Pods will not be marked ready until the readiness probe returns an HTTP 200 response. Use the `kubectl describe` to view details for the `distance-calculator-with-distances` Pod.
+Pods will not be marked ready until the readiness probe returns an HTTP 200 response. Use the `kubectl describe` to view details for the `distance-calculator` Pod.
 
 === Hints
 
@@ -49,37 +49,37 @@ kubectl describe pods <pod-name>
 
 === Quiz
 
-* How is the readiness of the `distance-calculator-with-distances` Pod determined?
-* How is the liveness of the `distance-calculator-with-distances` Pod determined?
+* How is the readiness of the `distance-calculator` Pod determined?
+* How is the liveness of the `distance-calculator` Pod determined?
 * How often is the readiness probe checked?
 * How often is the liveness probe checked?
 
-> The `distance-calculator-with-distances` Pod logs each health check. Use the `kubectl logs` command to view them.
+> The `distance-calculator` Pod logs each health check. Use the `kubectl logs` command to view them.
 
 == Tutorial: Experiment with Readiness Probes
 
-In this tutorial you will observe how Kubernetes responds to failed readiness probes. The `distance-calculator` container supports the ability to force failures of it's readiness and liveness probes. This will enable us to simulate failures for the `distance-calculator-with-distances` Pod.
+In this tutorial you will observe how Kubernetes responds to failed readiness probes. The `distance-calculator` container supports the ability to force failures of it's readiness and liveness probes. This will enable us to simulate failures for the `distance-calculator` Pod.
 
-Use the `kubectl port-forward` command to forward a local port to the health port of the `distance-calculator-with-distances` Pod.
+Use the `kubectl port-forward` command to forward a local port to the health port of the `distance-calculator` Pod.
 
 ```
-kubectl port-forward distance-calculator-with-distances 10081:8082
+kubectl port-forward distance-calculator 10081:8082
 ```
 
-> You now have access to the `/probes/readiness` and `/probes/liveness` HTTP endpoints exposed by the `distance-calculator-with-distances` container.
+> You now have access to the `/probes/readiness` and `/probes/liveness` HTTP endpoints exposed by the `distance-calculator` container.
 
 === Experiment with Readiness Probes
 
-Force the `distance-calculator-with-distances` container readiness probe to fail. Use the `curl` command to toggle the readiness probe status:
+Force the `distance-calculator` container readiness probe to fail. Use the `curl` command to toggle the readiness probe status:
 
 ```
 curl http://127.0.0.1:10081/probes/readiness/fail
 ```
 
-Wait about 45 seconds and get the status of the `distance-calculator-with-distances` Pod using the `kubectl get pods` command:
+Wait about 45 seconds and get the status of the `distance-calculator` Pod using the `kubectl get pods` command:
 
 ```
-watch kubectl get pods distance-calculator-with-distances
+watch kubectl get pods distance-calculator
 ```
 
 TIP: `watch` has been added to the command so you don't have to run it the command multiple times
@@ -87,10 +87,10 @@ TIP: `watch` has been added to the command so you don't have to run it the comma
 Use the `kubectl describe` command to get more details about the failing readiness probe:
 
 ```
-kubectl describe pods distance-calculator-with-distances
+kubectl describe pods distance-calculator
 ```
 
-> Notice the events for the `distance-calculator-with-distances` Pod report details about failing readiness probe.
+> Notice the events for the `distance-calculator` Pod report details about failing readiness probe.
 
 Force the `distance-calculator` container readiness probe to pass. Use the `curl` command to toggle the readiness probe status:
 
@@ -98,10 +98,10 @@ Force the `distance-calculator` container readiness probe to pass. Use the `curl
 curl http://127.0.0.1:10081/probes/readiness/success
 ```
 
-Wait about 15 seconds and get the status of the `distance-calculator-with-distances` Pod using the `kubectl get pods` command:
+Wait about 15 seconds and get the status of the `distance-calculator` Pod using the `kubectl get pods` command:
 
 ```
-watch kubectl get pods distance-calculator-with-distances
+watch kubectl get pods distance-calculator
 ```
 
 == Exercise: Experiment with Liveness Probes
@@ -111,7 +111,7 @@ Building on what you learned in the previous tutorial use the `kubectl port-forw
 === Hints
 
 ```
-kubectl port-forward distance-calculator-with-distances 10081:8082
+kubectl port-forward distance-calculator 10081:8082
 ```
 
 ```

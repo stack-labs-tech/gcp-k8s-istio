@@ -44,7 +44,7 @@ cat manifests/app/pods/distance-calculator-with-distances.yaml
 Create the `distance-calculator` Pod using kubectl:
 
 ```
-kubectl create -f manifests/app/pods/distance-calculator-with-distances.yaml
+kubectl apply -f manifests/app/pods/distance-calculator-with-distances.yaml
 ```
 
 ==== Test the endpoint

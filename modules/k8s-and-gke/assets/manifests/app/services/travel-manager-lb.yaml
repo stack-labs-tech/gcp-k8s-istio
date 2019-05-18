@@ -6,7 +6,7 @@ spec:
   type: LoadBalancer
   selector:
     app: travel-manager
-    version: "1"
+    version: v1
   ports:
     - protocol: TCP
       port: 60000

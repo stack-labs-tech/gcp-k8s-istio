@@ -1,47 +1,61 @@
 = Creating and Managing Deployments
 
+So far we have created _Pods_ and _Services_ but we only had one instance of the same application running at a given time. Additionnaly, _Pods_ are tied to the lifetime of the node they are created on. When the node goes away so does the Pod.
 
-Deployments abstract away the low level details of managing Pods. Pods are tied to the lifetime of the node they are created on. When the node goes away so does the Pod. ReplicaSets can be used to ensure one or more replicas of a Pods are always running, even when nodes fail.
+To go further we will use deployments to abstract away the low level details of managing _Pods_. _ReplicaSets_ can be used to ensure one or more replicas of a Pods are always running, even when nodes fail.
 
 Deployments sit on top of ReplicaSets and add the ability to define how updates to Pods should be rolled out.
 
-In this chapter we will combine everything we learned about Pods and Services to breakup the monolith application into smaller Services. You will create 3 deployments, one for each service:
-
-* frontend 
-* auth
-* hello
-
-You will also define internal services for the `auth` and `hello` deployments and an external service for the `frontend` deployment.
+In this chapter we will update our current microservice architecture to make each application manageable via a deployment instead of directly deploying _Pods_ units.
 
 == Tutorial: Creating Deployments
 
-=== Create and Expose the Auth Deployment
+=== Cleanup pods
 
-Create and explore the Deployment for service `auth`:
-```shell
-kubectl create -f manifests/app/deployments/auth.yaml
-kubectl describe deployments auth
+First of all let's delete all running pods:
+
+```
+kubectl delete po --field-selector=status.phase='Running'
 ```
 
-Now create the corresponding service:
+INFO: Note that we do not delete the services, however if you remember from previous sections, services will "unload" the endpoints as pods (with labels) that matched the service are deleted. However as we will keep the same labels in our deployments, services will detect our new pods as we deploy them.
+
+=== Create deployments
+
+First explore your first deployment:
+
 ```shell
-kubectl create -f manifests/app/services/auth.yaml
+cat manifests/app/deployments/distance-calculator.yaml
 ```
 
-=== Create and Expose the Hello Deployment
-Do the same for the `hello` deployment and services:
+Compare this deployment file with the equivalent pod file: what are the differences ?
+
+image::pod-dep-diffs.png[]
+
+A few differences are noticeable:
+
+. Of course the new resource has a _Kind_ of `Deployment` and not `Pod` anymore...
+. There is a new hierarchy level: this is due to the fact that the `Deployment` is an abstraction over the `Pod`.
+. We added a new field `replicas` that will allow us to scale the number of pods we want :)
+
+Alright, time to deploy our `Deployments` to our k8s cluster:
+
 ```shell
-kubectl create -f manifests/app/deployments/hello.yaml
-kubectl describe deployments hello
-kubectl create -f manifests/app/services/hello.yaml
+kubectl apply -f manifests/app/deployments/distance-calculator.yaml
+kubectl apply -f manifests/app/deployments/redis.yaml
+kubectl apply -f manifests/app/deployments/travel-manager.yaml
 ```
 
-=== Create and Expose the Frontend Deployment
-And at least for the frontend:
-```shell
-kubectl create configmap nginx-frontend-conf --from-file=manifests/app/nginx/frontend.conf
-kubectl create -f manifests/app/deployments/frontend.yaml
-kubectl create -f manifests/app/services/frontend.yaml
+Verify that all `Deployments` have been deployed correctly :
+
+```
+kubectl get deploy
+```
+
+We can also verify that the number of `Pods` deployed corresponds to what we asked for (3 Pods for `travel-manager and `distance-calculator` 1 for `redis`) by running the now classical command:
+
+```
+kubectl get pods
 ```
 
 == Tutorial: Scaling Deployments
@@ -52,40 +66,50 @@ Behind the scenes Deployments manage ReplicaSets. Each deployment is mapped to o
 kubectl get replicasets
 ```
 
-ReplicaSets are scaled through the Deployment for each service and can be scaled independently. Use the `kubectl scale` command to scale the hello deployment:
+ReplicaSets are scaled through the Deployment for each service and can be scaled independently. Use the `kubectl scale` command to scale the travel-manager deployment:
 
 ```
-kubectl scale deployments hello --replicas=3
-kubectl describe deployments hello
+kubectl scale deployments travel-manager --replicas=5
+kubectl describe deployments travel-manager
 kubectl get pods
 kubectl get replicasets
 ```
 
 == Exercise: Scaling Deployments
 
-In this exercise you will scale the `frontend` deployment using an existing deployment configuration file. You'll have to change the `replicas:` property to 3.
+In this exercise you will scale the `redis` deployment using an existing deployment configuration file. You'll have to change the `replicas:` property to 3.
 
 === Hints
 
 ```
-vim manifests/app/deployments/frontend.yaml
+vim manifests/app/deployments/redis.yaml
 ```
 
 ```
-kubectl apply -f manifests/app/deployments/frontend.yaml
+kubectl apply -f manifests/app/deployments/redis.yaml
 ```
 
-== Exercise: Interact with the Frontend Service
+== Exercise: Interact with the Travel Manager Service
 
-=== Hints
-
-```
-kubectl get services frontend
-```
+Just like we did in the previous section, we can query our `travel-manager` application through the same `LoadBalancer` service as before:
 
 ```
-curl -k https://<EXTERNAL-IP>
+kubectl get svc travel-manager --output yaml
 ```
+
+Once you have a value under status.loadBalancer.ingress.ip`, you can query the `travel-manager` service from the outside world by running a simple curl. This time we will be using the endpoint `who` which returns the hostname of the `travel-manager` instance that was called along with the `distance-calculator` instance hostname that was called.
+
+Try this multiple times:
+
+```
+curl http://<INGRESS_IP>:60000/who
+```
+
+You should see an output similar to this one (with another external IP address and other hostnames):
+
+image::who-multiple-services.png[]
+
+* What can we deduce from this ?
 
 == Summary
 

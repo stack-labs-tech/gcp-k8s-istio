@@ -1,0 +1,46 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: distance-calculator
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: distance-calculator
+    spec:
+      containers:
+        - name: distance-calculator
+          image: stacklabs/distance-calculator:0.0.1
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8082
+          volumeMounts:
+              - name: "distances-conf"
+                mountPath: "/config"
+          livenessProbe:
+            httpGet:
+              path: /probes/liveness
+              port: 8082
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /probes/readiness
+              port: 8082
+              scheme: HTTP
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+          env:
+            - name: DISTANCES_CONFIG_FILE
+              value: /config/distances.json
+      volumes:
+        - name: "distances-conf"
+          configMap:
+            name: "distances-conf"
+            items:
+              - key: "distances.json"
+                path: "distances.json"

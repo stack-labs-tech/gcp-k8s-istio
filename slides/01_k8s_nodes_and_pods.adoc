@@ -8,13 +8,6 @@
 * Containers can talk to each other through ‘localhost’.
 * Assigned to cluster nodes by the Kubernetes Scheduler.
 
-=== Resources: Deployment
-
-* Specification of a Pod template together with the replication strategy.
-* Controls the amount of Replication.
-* Manages rolling updates.
-* Software and replication upgrades is a simple “kubectl deployment edit”.
-
 === Workshop microservices architecture
 image::images/microservices-architecture.png[]
 
