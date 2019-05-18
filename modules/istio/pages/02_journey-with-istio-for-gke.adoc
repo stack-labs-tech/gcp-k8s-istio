@@ -1,0 +1,23 @@
+= Journey with Istio for GKE
+
+[#istio-namespace]
+== Istio namespace
+
+Run the following command to see what is present in the `istio-system` namespace
+
+[source, bash]
+----
+Λ\:$ kubectl get services -n istio-system
+  NAME                     TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)                                                                                                                   AGE
+  istio-citadel            ClusterIP      10.121.14.33   <none>          8060/TCP,9093/TCP                                                                                                         13m
+  istio-egressgateway      ClusterIP      10.121.0.254   <none>          80/TCP,443/TCP                                                                                                            13m
+  istio-galley             ClusterIP      10.121.3.68    <none>          443/TCP,9093/TCP                                                                                                          13m
+  istio-ingressgateway     LoadBalancer   10.121.0.110   35.228.82.117   80:31122/TCP,443:31260/TCP,31400:30822/TCP,15011:31100/TCP,8060:32306/TCP,853:32455/TCP,15030:31345/TCP,15031:30823/TCP   13m
+  istio-pilot              ClusterIP      10.121.13.81   <none>          15010/TCP,15011/TCP,8080/TCP,9093/TCP                                                                                     13m
+  istio-policy             ClusterIP      10.121.9.214   <none>          9091/TCP,15004/TCP,9093/TCP                                                                                               13m
+  istio-sidecar-injector   ClusterIP      10.121.15.71   <none>          443/TCP                                                                                                                   13m
+  istio-telemetry          ClusterIP      10.121.5.223   <none>          9091/TCP,15004/TCP,9093/TCP,42422/TCP                                                                                     13m
+  promsd                   ClusterIP      10.121.7.250   <none>          9090/TCP                                                                                                                  13m
+----
+
+Here, you see the external IP of your cluster, which is in this case, *35.228.82.117*
