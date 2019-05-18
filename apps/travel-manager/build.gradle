@@ -54,7 +54,7 @@ shadowJar {
 run.jvmArgs('-noverify', '-XX:TieredStopAtLevel=1')
 
 mainClassName = "com.stack_labs.workshop.Application"
-jib.to.image = 'stacklabs/travel-manager:0.0.1'
+jib.to.image = 'stacklabs/travel-manager:0.0.3'
 
 test {
     useJUnitPlatform()

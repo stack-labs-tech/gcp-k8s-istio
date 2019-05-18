@@ -6,8 +6,8 @@ micronaut:
         port: 8081
 
 distance-calculator:
-    url: http://localhost:8082
+    url: ${DISTANCE_CALCULATOR_URL:http://localhost:8082}
 
 ---
 redis:
-    uri: redis://localhost
+    uri: redis://${REDIS_HOST:localhost}:${REDIS_PORT:6379}
