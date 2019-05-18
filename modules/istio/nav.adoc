@@ -1,4 +1,4 @@
-* **Part 2 : Istio** ⛵️
+* **Istio** ⛵️
 
 ** xref:01_setup.adoc[1. Setup]
 *** xref:01_setup.adoc#prerequisites[Prerequisites]

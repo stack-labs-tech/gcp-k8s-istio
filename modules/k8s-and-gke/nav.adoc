@@ -1,4 +1,4 @@
-* **Part 1 : Kubernetes** ⚓️
+* **Google Kubernetes Engine** ⚓️
 
 ** xref:01_setup.adoc#start-gke[1. Create cluster]
 *** xref:01_setup.adoc#create-from-gcp[Create from GCP]

@@ -1,4 +1,4 @@
-* **Part 3 : Connecting to managed services**
+* **GCP from withing GKE**
 
 
 
