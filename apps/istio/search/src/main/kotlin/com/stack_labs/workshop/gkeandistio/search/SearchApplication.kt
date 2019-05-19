@@ -36,11 +36,11 @@ class SearchHandler(prop: SearchProperties) {
     val version = prop.version
     val event = prop.event
 
-    val requestWaitingRange = (0..10)
+    val requestWaitingRange = (0..1000).map(Int::toLong)
 
     fun serve(serverRequest: ServerRequest): Mono<ServerResponse> {
 
-        val duration = (requestWaitingRange.shuffled().first() * 100).toLong()
+        val duration = requestWaitingRange.shuffled().first()
 
         return ok()
                 .syncBody(DemoMessage(event, "search ($version)"))

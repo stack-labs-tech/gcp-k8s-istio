@@ -29,14 +29,15 @@ class UIHandler(val search: SearchService, prop: UIProperties) {
     private val log = LoggerFactory.getLogger(UIHandler::class.java)
 
     val version = prop.version
-    val requestWaitingRange = (0..10)
+    val requestWaitingRange = (0..1000).map(Int::toLong)
 
     fun serve(serverRequest: ServerRequest): Mono<ServerResponse> {
-        val duration = (requestWaitingRange.shuffled().first() * 100).toLong()
+        val duration = ofMillis(requestWaitingRange.shuffled().first() / 2)
 
-        return search
-                .search()
-                .delayElement(ofMillis(duration))
+        return Mono.just(1)
+                .delayElement(duration)
+                .flatMap { search.search() }
+                .delayElement(duration)
                 .map { it.copy(from = "ui ($version) => ${it.from}", date = now()) }
                 .doOnNext { log.info("UI service in version $version called and answered with $it") }
                 .flatMap { ServerResponse.ok().syncBody(it) }
