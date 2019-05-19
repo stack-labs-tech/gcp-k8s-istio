@@ -19,6 +19,7 @@
 Load the workshop :
 
 https://github.com/stack-labs-tech/gcp-k8s-istio
+https://stack-labs.gitlab.io/training/gcp-k8s-istio/gke-training/1.0.0/introduction.html
 
 === Practice time !
 

@@ -1,5 +1,13 @@
 # GCP: Kubernetes and Istio workshop
 
+## Access Worshop resources
+
+Workshop resources can be found here:
+
+https://stack-labs.gitlab.io/training/gcp-k8s-istio/gke-training/1.0.0/introduction.html
+
+## How to build
+
 This project contains all required files to provide the workshop, including:
 
 * [documentation](documentation): the folder that contains the step-by-step instructions to go through the workshop
