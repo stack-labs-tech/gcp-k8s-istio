@@ -16,27 +16,27 @@ You can create the cluster from UI, following those steps:
 
 1. Open cluster pages on Google Cloud Console
 +
-image:setup/01_go-to-gke-cluster-page.png[Open cluster pages on Google Cloud Console]
+image:01_setup/01_go-to-gke-cluster-page.png[Open cluster pages on Google Cloud Console]
 
 2. Click on create cluster
 +
-image:setup/02_click-on-create-cluster.png[Click on create cluster]
+image:01_setup/02_click-on-create-cluster.png[Click on create cluster]
 
 3. Name the cluster, choose version of GKE and select 2vCPU / 7,5Gb of ram machine type
 +
-image:setup/03_fill-form-01.png[fill form cluster creation 01]
+image:01_setup/03_fill-form-01.png[fill form cluster creation 01]
 
 4. In advanced settigs, choose to use VPC Native and follow the parameters in the capture
 +
-image:setup/04_fill-form-02.png[fill form cluster creation 02]
+image:01_setup/04_fill-form-02.png[fill form cluster creation 02]
 
 5. Enable the multiple stack-driver options (Logging, Monitoring, and the new beta version) like in the capture
 +
-image:setup/05_fill-form-03.png[fill form cluster creation 03]
+image:01_setup/05_fill-form-03.png[fill form cluster creation 03]
 
 6. Finally, enable the Istio module with permissive mode like in the capture
 +
-image:setup/06_fill-form-04.png[fill form cluster creation 04]
+image:01_setup/06_fill-form-04.png[fill form cluster creation 04]
 
 
 [#cluster-creation-from-cli]
@@ -86,8 +86,8 @@ istio-formation  europe-north1-a  1.13.5-gke.10   35.228.5.44  n1-standard-2  1.
 The cluster creation will take few minutes. Then, after the creation is complete, you have to `connect` to it.
 To do so, you have to click on the `connect` button in the Google Cloud Console, in the list of clusters.
 
-image:setup/07-connect-to-cluster-01.png[choose cluster to connect to]
+image:01_setup/07-connect-to-cluster-01.png[choose cluster to connect to]
 
 Then, you can copy/paste the command line to your CLI or execute it directly inside the Google Cloud Shell.
 
-image:setup/08-connect-to-cluster-02.png[execute the command displayed in the UI]
+image:01_setup/08-connect-to-cluster-02.png[execute the command displayed in the UI]
