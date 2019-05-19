@@ -1,0 +1,5 @@
+search:
+  event: "Default event"
+  version: v1
+
+management.server.port: 8181
