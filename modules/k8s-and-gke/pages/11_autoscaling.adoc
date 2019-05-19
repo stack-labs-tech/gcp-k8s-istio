@@ -34,7 +34,7 @@ To test auto-scaling we need to generate load on our container. To do this we ca
 kubectl run -i --tty load-generator --image=busybox /bin/sh
 > Press enter
 while true; do wget -q -O- http://php-apache.default.svc.cluster.local; done
-``
+```
 
 Keep the load loop running and go back to the previous terminal (the one running the `watch` command). You shoud now see the number of replicas increasing.
 
