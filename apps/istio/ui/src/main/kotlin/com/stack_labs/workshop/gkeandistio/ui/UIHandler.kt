@@ -8,6 +8,7 @@ import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.router
 import reactor.core.publisher.Mono
+import java.time.Duration.ofMillis
 import java.time.ZonedDateTime.now
 
 /**
@@ -28,11 +29,17 @@ class UIHandler(val search: SearchService, prop: UIProperties) {
     private val log = LoggerFactory.getLogger(UIHandler::class.java)
 
     val version = prop.version
+    val requestWaitingRange = (0..10)
 
-    fun serve(serverRequest: ServerRequest): Mono<ServerResponse> = search
-            .search()
-            .map { it.copy(from = "ui ($version) => ${it.from}", date = now()) }
-            .doOnNext { log.info("UI service in version $version called and answered with $it") }
-            .flatMap { ServerResponse.ok().syncBody(it) }
-            .doOnSubscribe { log.info("UI Service in version $version starting...") }
+    fun serve(serverRequest: ServerRequest): Mono<ServerResponse> {
+        val duration = (requestWaitingRange.shuffled().first() * 100).toLong()
+
+        return search
+                .search()
+                .delayElement(ofMillis(duration))
+                .map { it.copy(from = "ui ($version) => ${it.from}", date = now()) }
+                .doOnNext { log.info("UI service in version $version called and answered with $it") }
+                .flatMap { ServerResponse.ok().syncBody(it) }
+                .doOnSubscribe { log.info("UI Service in version $version starting...") }
+    }
 }
