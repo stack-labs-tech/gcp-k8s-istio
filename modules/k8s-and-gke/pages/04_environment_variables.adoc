@@ -1,0 +1,68 @@
+= Environment Variables
+
+In Kubernetes there are two types of environment variables:
+
+. Environment variables autoconfigured by Kubernetes
+. Custom environemnt variables (injected by user)
+
+In this chapter we will learn about the different types of environment variables that Kubernetes provides and supports.
+
+== Tutorial: Checking environment variables
+
+In this tutorial we will deploy a simple nginx image in which we will execute a shell so we can query the environment variables available. First check the nginx _Pod_:
+
+```shell
+cat manifests/app/pods/nginx.yaml
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+      ports:
+        - containerPort: 80
+      env:
+        - name: SOME_ENV_VARIABLE
+          value: "Value of this env var"
+```
+
+INFO: Notice that we specifically request that an environment variable named `SOME_ENV_VARIABLE` has to be injected in our container with the specified value.
+
+Now deploy the pod just as we did before:
+
+```shell
+kubectl apply -f manifests/app/pods/nginx.yaml
+```
+
+NOTE: If you still have the old `nginx` Pod running, run a `kubectl delete pod nginx` before you apply this new Pod.
+
+Once deployed, execute a shell into this nginx container:
+
+```shell
+kubectl exec <NGINX_POD_NAME> --stdin --tty -c nginx /bin/sh
+env
+```
+
+=== Quizz
+
+* How many environment variables do you see ?
+* Which specific environment variables do you see ?
+
+==== Hints
+
+```shell
+env | grep SOME_ENV_VARIABLE
+```
+
+```shell
+env | grep HOSTNAME
+```
+
+== Summary
+
+In this chapter we learned that Kubernetes is automatically injecting environment variables and that it is easy to add our own environment variables to a deployed container. It is very useful when deploying containers that need to act upon specific environment contexts.
