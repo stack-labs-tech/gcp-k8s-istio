@@ -48,26 +48,36 @@ Important: Don't forget to set your default project before running this command
 
 [source,bash]
 ----
-gcloud beta container clusters create "istio-formation" \
---zone "europe-north1-a" \
---no-enable-basic-auth \
---cluster-version "1.13.5-gke.10" \
---machine-type "n1-standard-2" \
---image-type "COS" \
---disk-type "pd-standard" \
---disk-size "100" \
---metadata disable-legacy-endpoints=true \
---scopes "https://www.googleapis.com/auth/devstorage.read_only","https://www.googleapis.com/auth/logging.write","https://www.googleapis.com/auth/monitoring","https://www.googleapis.com/auth/servicecontrol","https://www.googleapis.com/auth/service.management.readonly","https://www.googleapis.com/auth/trace.append" \
---num-nodes "4" \
---enable-stackdriver-kubernetes \
---enable-ip-alias \
---network "projects/istio-csm/global/networks/default" \
---subnetwork "projects/istio-csm/regions/europe-north1/subnetworks/default" \
---default-max-pods-per-node "110" \
---addons HorizontalPodAutoscaling,HttpLoadBalancing,Istio \
---istio-config auth=MTLS_PERMISSIVE \
---enable-autoupgrade \
---enable-autorepair
+Λ\:$ gcloud beta container clusters create "istio-formation" \
+             --zone "europe-north1-a" \
+             --no-enable-basic-auth \
+             --cluster-version "1.13.5-gke.10" \
+             --machine-type "n1-standard-2" \
+             --image-type "COS" \
+             --disk-type "pd-standard" \
+             --disk-size "100" \
+             --metadata disable-legacy-endpoints=true \
+             --scopes "https://www.googleapis.com/auth/devstorage.read_only","https://www.googleapis.com/auth/logging.write","https://www.googleapis.com/auth/monitoring","https://www.googleapis.com/auth/servicecontrol","https://www.googleapis.com/auth/service.management.readonly","https://www.googleapis.com/auth/trace.append" \
+             --num-nodes "4" \
+             --enable-stackdriver-kubernetes \
+             --enable-ip-alias \
+             --network "projects/istio-csm/global/networks/default" \
+             --subnetwork "projects/istio-csm/regions/europe-north1/subnetworks/default" \
+             --default-max-pods-per-node "110" \
+             --addons HorizontalPodAutoscaling,HttpLoadBalancing,Istio \
+             --istio-config auth=MTLS_PERMISSIVE \
+             --enable-autoupgrade \
+             --enable-autorepair
+
+WARNING: Starting in 1.12, new clusters will not have a client certificate issued. You can manually enable (or disable) the issuance of the client certificate using the `--[no-]issue-client-certificate` flag.
+WARNING: The Pod address range limits the maximum size of the cluster. Please refer to https://cloud.google.com/kubernetes-engine/docs/how-to/flexible-pod-cidr to learn how to optimize IP address allocation.
+This will enable the autorepair feature for nodes. Please see https://cloud.google.com/kubernetes-engine/docs/node-auto-repair for more information on node autorepairs.
+Creating cluster istio-formation in europe-north1-a... Cluster is being health-checked (master is healthy)...done.
+Created [https://container.googleapis.com/v1beta1/projects/istio-csm/zones/europe-north1-a/clusters/istio-formation].
+To inspect the contents of your cluster, go to: https://console.cloud.google.com/kubernetes/workload_/gcloud/europe-north1-a/istio-formation?project=istio-csm
+kubeconfig entry generated for istio-formation.
+NAME             LOCATION         MASTER_VERSION  MASTER_IP    MACHINE_TYPE   NODE_VERSION   NUM_NODES  STATUS
+istio-formation  europe-north1-a  1.13.5-gke.10   35.228.5.44  n1-standard-2  1.13.5-gke.10  4          RUNNING
 ----
 
 [#connect-to-cluster]
