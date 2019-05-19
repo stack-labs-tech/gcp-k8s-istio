@@ -29,3 +29,6 @@ image::images/gcp-loadbalancer.png[size=contain]
 
 LoadBalancer > NodePort > ClusterIP > Container port
 
+=== Practice time !
+
+Play with auto-scaling !

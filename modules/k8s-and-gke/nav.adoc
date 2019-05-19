@@ -19,4 +19,5 @@
 ** xref:08_creating-and-managing-deployments.adoc[8. Deployments & Scaling]
 ** xref:09_rolling-out-updates.adoc[9. Rolling-upgrade]
 ** xref:10_resources-limiting.adoc[10. Resource Limiting]
+** xref:11_autoscaling.adoc[11. Autoscaling]
 ** xref:15_cleanup.adoc[15. Cleanup]

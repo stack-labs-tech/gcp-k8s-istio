@@ -23,6 +23,10 @@ include::01_k8s_services.adoc[]
 // Creation of multiple deployments
 include::01_k8s_deployments.adoc[]
 
+// 01 - Scaling
+// Experimenting scaling & autoscaling
+include::01_k8s_scaling.adoc[]
+
 
 === High Availability and Elasticity
 

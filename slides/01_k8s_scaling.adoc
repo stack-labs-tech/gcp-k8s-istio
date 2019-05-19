@@ -1,0 +1,14 @@
+
+=== Manual Scaling
+
+* Simple way to respond to load increase
+* Deployment with configurable number of `replicas
+
+=== Auto-Scaling
+
+image::images/horizontal-pod-autoscaler.svg[]
+
+=== Auto-Scaling
+
+* Requires that resources request are set
+

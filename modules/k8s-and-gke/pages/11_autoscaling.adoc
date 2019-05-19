@@ -1,0 +1,49 @@
+= Autoscaling
+
+So far we have played with manual scaling: it is already great to be able to rapidly scale our app from 3 instances to 10 instances when we detect that it is needed. However, wouldn't it be better if we were able to do this automatically, relying only on Kubernetes and load metrics ?
+
+In this chapter, we will learn to deploy a Kubernetes `Horizontal Pod Autoscaler` (HPA) that will automatically scale our app based on appropriate metrics.
+
+== Tutorial: Create an Horizontal Pod Autoscaler
+
+In this tutorial we will deploy a CPU intensive apache container and configure an HPA to make sure that the number of replicas of our container increases as the load increases. We will follow official https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/[HPA walkthrough].
+
+First, we will start a deployment running the image and expose it as a service:
+
+Now that our apache server is running, we can create the Horizontal Pod Autoscaler:
+
+```shell
+kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=10
+```
+
+NOTE: Our HPA is configured to make sure that the average CPU utilization across all Pods stays below 50%, and will scale from 1 to 10 replicas depending on this CPU usage metric.
+
+We can verify that our HPA has been deployed:
+
+```shell
+watch kubectl get hpa
+```
+
+TIP: `watch` command will allow us to keep monitoring the state of our HPA as it evolves
+
+=== Generate load
+
+To test auto-scaling we need to generate load on our container. To do this we can run the following container in a **new terminal**:
+
+```shell
+kubectl run -i --tty load-generator --image=busybox /bin/sh
+> Press enter
+while true; do wget -q -O- http://php-apache.default.svc.cluster.local; done
+``
+
+Keep the load loop running and go back to the previous terminal (the one running the `watch` command). You shoud now see the number of replicas increasing.
+
+=== Stop load
+
+In the other terminal (the one where you have the load test running), hit <Ctrl>+C to stop the load test. Go back to the first terminal, wait a minute or so to see that the number of replicas progressively goes back to 1.
+
+== Summary
+
+In this chapter we learned to add an Horizontal Pod Autoscaler on a given _Pod_/_Deployment_ based on CPU usage.
+
+TIP: Although it is not covered in this chapter, it is of course possible to configure HPA to scale on any custom metric, not limiting to Kubernetes resources (e.g. memory or CPU). It can particularly be useful when plugging to a Stackdriver platform or such.
