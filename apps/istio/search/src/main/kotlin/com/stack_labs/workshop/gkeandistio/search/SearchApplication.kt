@@ -7,8 +7,11 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.ServerResponse.ok
 import org.springframework.web.reactive.function.server.router
+import reactor.core.publisher.Mono
+import java.time.Duration.ofMillis
 
 @SpringBootApplication
 class SearchApplication
@@ -33,9 +36,17 @@ class SearchHandler(prop: SearchProperties) {
     val version = prop.version
     val event = prop.event
 
-    fun serve(serverRequest: ServerRequest) = ok()
-            .syncBody(DemoMessage(event, "search ($version)"))
-            .doOnNext { log.info("Search service called and respond with event \"$event:$version\" ") }
+    val requestWaitingRange = (0..10)
+
+    fun serve(serverRequest: ServerRequest): Mono<ServerResponse> {
+
+        val duration = (requestWaitingRange.shuffled().first() * 100).toLong()
+
+        return ok()
+                .syncBody(DemoMessage(event, "search ($version)"))
+                .delayElement(ofMillis(duration))
+                .doOnNext { log.info("Search service called and respond with event \"$event:$version\" ") }
+    }
 }
 
 data class DemoMessage(val hello: String, val from: String)
