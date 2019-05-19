@@ -102,7 +102,7 @@
                 <version>1.2.0</version>
                 <configuration>
                     <to>
-                        <image>stacklabs/gke-and-istio/search</image>
+                        <image>docker.io/stacklabs/gke-and-istio-search</image>
                     </to>
                 </configuration>
             </plugin>
