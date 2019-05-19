@@ -1,0 +1,32 @@
+{
+  "name": "gitlab-workshop",
+  "version": "1.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "antora generate --to-dir dist/ site.yml",
+    "start": "yarn build && node serve.js",
+    "release": "standard-version -m \"chore(release): version %s\" -t \"\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/neonox31/gitlab-workshop.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/neonox31/gitlab-workshop/issues"
+  },
+  "homepage": "https://gitlab.com/neonox31/gitlab-workshop#README",
+  "devDependencies": {
+    "@antora/cli": "^2.0.0",
+    "@antora/site-generator-default": "^2.0.0",
+    "browser-sync": "^2.26.3",
+    "standard-version": "^4.4.0"
+  },
+  "dependencies": {
+    "build": "^0.1.4",
+    "run": "^1.4.0",
+    "serve": "^11.0.0"
+  }
+}

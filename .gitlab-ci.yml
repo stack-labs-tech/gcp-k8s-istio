@@ -1,11 +1,28 @@
-image: antora/antora
+image: node:10
+
+build:
+  stage: build
+  before_script:
+  - node --version
+  - npm --version
+  - yarn --version
+  - yarn
+  script:
+  - yarn build
+  artifacts:
+    paths:
+    - dist/*
+    expire_in: 30 days
 
 pages:
   stage: deploy
   script:
-    - site.yml
+  - mkdir public/
+  - cp -r dist/* public/
+  - ls -la public/
   artifacts:
       paths:
-      - build/site/
+      - public
   only:
   - master
+  - tags
