@@ -1,0 +1,109 @@
+= Istio Hello World
+
+[#deploy-application]
+== Deploy Applications
+
+To discover Istio, we will start by applying a full-featured configuration of applications and observe its behaviour through the cloud console.
+
+We should run the following command to deploy applications in the cluster:
+
+[source, bash]
+----
+Λ\:$ kub apply -f /Users/kevin/Workspace/gitlab.com/stack-labs/Training/gcp-k8s-istio/apps/istio/demo-hello-world.yaml
+----
+
+After that, a namespace will be created with two components:
+* ui
+* search
+
+----
+          +-----------------+             +---------------------+
+          |                 |             |                     |
++---------+   UI Service    |------------>+   Search Service    |
+          |                 |             |                     |
+          +-----------------+             +---------------------+
+----
+
+
+You can look at deployment of each component:
+
+[source, bash]
+----
+Λ\:$ kubectl get services,po -n workshop -o wide
+NAME             TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)    AGE   SELECTOR
+service/search   ClusterIP   10.121.5.21   <none>        8080/TCP   14m   app=search,version=v1
+service/ui       ClusterIP   10.121.9.78   <none>        8080/TCP   14m   app=ui
+
+NAME                          READY   STATUS    RESTARTS   AGE   IP           NODE                                             NOMINATED NODE   READINESS GATES
+pod/search-798c5b6cfd-cfs8v   2/2     Running   0          14m   10.56.3.10   gke-istio-formation-default-pool-340f9ac3-5hns   <none>           <none>
+pod/ui-v1-7f54ffb994-wx4pm    2/2     Running   0          14m   10.56.1.11   gke-istio-formation-default-pool-340f9ac3-329g   <none>           <none>
+----
+
+[#generate-traffic]
+== Generate traffic
+
+To generate traffic on the application, you can use `curl` or `http` command line tools. You will use the *Ingress Gateway* ip you found in the previous step to call the cluster
+
+[source, bash]
+----
+Λ\:$ curl  35.228.54.223
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-19T18:51:12.414Z"}
+----
+
+You can see the stack call made in the field `from` with the value `ui (v1) => search (v1)`.
+
+In order to generate a lot of traffic, we will use the tool named *Siege* packaged inside the docker image `yokogawa/siege`
+
+[source, bash]
+----
+Λ\:$ docker run --rm -it yokogawa/siege 35.228.54.223
+** SIEGE 3.0.5
+** Preparing 15 concurrent users for battle.
+The server is now under siege...
+----
+
+During this operation a lots of requests are send to your cluster, so don't forget to stop it when you thinks the job is done.
+To stop it, you have to type `CTRL+C`, *Siege* will present you the report of the test.
+
+[source, bash]
+----
+Λ\:~ kevin $ docker run --rm -it yokogawa/siege 35.228.54.223
+** SIEGE 3.0.5
+** Preparing 15 concurrent users for battle.
+The server is now under siege...^C
+Lifting the server siege...      done.
+
+Transactions:		          41 hits
+Availability:		      100.00 %
+Elapsed time:		        6.29 secs
+Data transferred:	        0.00 MB
+Response time:		        1.26 secs
+Transaction rate:	        6.52 trans/sec
+Throughput:		        0.00 MB/sec
+Concurrency:		        8.22
+Successful transactions:          41
+Failed transactions:	           0
+Longest transaction:	        2.19
+Shortest transaction:	        0.33
+
+FILE: /var/log/siege.log
+You can disable this annoying message by editing
+the .siegerc file in your home directory; change
+the directive 'show-logfile' to false.
+----
+
+[#traces]
+== Traces
+
+Due to the previous traffic generated, you can access the *trace* page inside the Google Cloud Console to see distributed tracing between services.
+
+image:03_istio-hello-world/01_traces.png[Distributed Tracing]
+
+[#logging]
+== Logging
+
+You can follow logs of each application in the Google Cloud Console, in the *logging* page.
+
+image:03_istio-hello-world/02_logging.png[Logging]
+
+

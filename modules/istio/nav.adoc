@@ -10,3 +10,9 @@
 **      xref:02_journey-with-istio-on-gke.adoc[2. Journey with Istio for GKE]
 ***     xref:02_journey-with-istio-on-gke.adoc#istio-namespace[Istio namespace]
 ***     xref:02_journey-with-istio-on-gke.adoc#stackdriver[Stackdriver]
+
+**      xref:03_istio-hello-world.adoc[3. Hello World]
+***     xref:03_istio-hello-world.adoc#deploy-application[Deploy application]
+***     xref:03_istio-hello-world.adoc#generate-traffic[Generate traffic]
+***     xref:03_istio-hello-world.adoc#traces[Traces]
+***     xref:03_istio-hello-world.adoc#logging[Logging]
