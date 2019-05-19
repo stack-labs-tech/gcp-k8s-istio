@@ -7,5 +7,6 @@
 ****    xref:01_setup.adoc#cluster-creation-from-cli[From the CLI]
 ***     xref:01_setup.adoc#connect-to-cluster[Connect to the cluster]
 
-**      xref:02_journey-with-istio-for-gke.adoc[2. Journey with Istio for GKE]
-***     xref:02_journey-with-istio-for-gke.adoc#istio-namespace[Istio namespace]
+**      xref:02_journey-with-istio-on-gke.adoc[2. Journey with Istio for GKE]
+***     xref:02_journey-with-istio-on-gke.adoc#istio-namespace[Istio namespace]
+***     xref:02_journey-with-istio-on-gke.adoc#stackdriver[Stackdriver]

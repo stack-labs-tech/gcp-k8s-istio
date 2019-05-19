@@ -1,0 +1,100 @@
+= Journey with Istio on GKE
+
+[#istio-namespace]
+== Istio namespace
+
+We will look for components deployed automatically by Google within our cluster, especially inside the Istio namespace.
+
+=== Services
+
+Run the following command to see what is present in the `istio-system` namespace
+
+[source, bash]
+----
+Λ\:$ kubectl get services -n istio-system
+  NAME                     TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)                                                                                                                   AGE
+  istio-citadel            ClusterIP      10.121.14.33   <none>          8060/TCP,9093/TCP                                                                                                         13m
+  istio-egressgateway      ClusterIP      10.121.0.254   <none>          80/TCP,443/TCP                                                                                                            13m
+  istio-galley             ClusterIP      10.121.3.68    <none>          443/TCP,9093/TCP                                                                                                          13m
+  istio-ingressgateway     LoadBalancer   10.121.0.110   35.228.82.117   80:31122/TCP,443:31260/TCP,31400:30822/TCP,15011:31100/TCP,8060:32306/TCP,853:32455/TCP,15030:31345/TCP,15031:30823/TCP   13m
+  istio-pilot              ClusterIP      10.121.13.81   <none>          15010/TCP,15011/TCP,8080/TCP,9093/TCP                                                                                     13m
+  istio-policy             ClusterIP      10.121.9.214   <none>          9091/TCP,15004/TCP,9093/TCP                                                                                               13m
+  istio-sidecar-injector   ClusterIP      10.121.15.71   <none>          443/TCP                                                                                                                   13m
+  istio-telemetry          ClusterIP      10.121.5.223   <none>          9091/TCP,15004/TCP,9093/TCP,42422/TCP                                                                                     13m
+  promsd                   ClusterIP      10.121.7.250   <none>          9090/TCP                                                                                                                  13m
+----
+
+Here, you see the external IP of your cluster, which is in this case, *35.228.82.117*
+
+=== Pods
+
+We also can look for pods used inside this namespace with the following command:
+
+[source, bash]
+----
+Λ\:$ kubectl get pods -n istio-system
+NAME                                      READY   STATUS      RESTARTS   AGE
+istio-citadel-6995f7bd9-xq67n             1/1     Running     0          3m24s
+istio-cleanup-secrets-dhbx5               0/1     Completed   0          3m27s
+istio-egressgateway-57b96d87bd-cm44k      1/1     Running     0          3m26s
+istio-galley-6d7dd498f6-bfs6f             1/1     Running     0          3m26s
+istio-ingressgateway-ddd557db7-cbnr6      1/1     Running     0          3m25s
+istio-pilot-5765d76b8c-fhqrl              2/2     Running     0          3m25s
+istio-policy-5b47b88467-frcr4             2/2     Running     0          3m25s
+istio-sidecar-injector-6b9fbbfcf6-gxxtk   1/1     Running     0          3m24s
+istio-telemetry-65dcd9ff85-qdlvr          2/2     Running     0          3m25s
+promsd-7b49dcb96c-cfxb2                   2/2     Running     1          3m21s
+----
+
+We can see the system has only one instance of each components. Istio on GKE provides some elements "configurable" to allow scalling up some core components of Istio.
+
+You can find a list of components which *can* be modified in the Istio on GKE system: https://cloud.google.com/istio/docs/istio-on-gke/overview#modifying_control_plane_settings
+
+[#stackdriver]
+== Stackdriver
+
+You can access the multiple elements of stackdriver through the cloud console, which will help you during the multiple next step.
+
+=== Stackdriver Monitoring
+
+You can access the Stackdriver monitoring dashboard through the cloud console, with the *Monitoring* component in the side bar.
+
+image:02_journey-with-istio-on-gke/01_stackdriver-monitoring.png[Stackdriver monitoring access]
+
+Then, you access a custom interface (out of the Google Cloud Console) dedicated to the monitoring operation
+
+image:02_journey-with-istio-on-gke/02_stackdriver-monitoring-dashboard.png[Stackdriver interface]
+
+In the resource pane, you can select the Kubernetes entry to follow what is monitored inside your cluster.
+
+image:02_journey-with-istio-on-gke/03_kubernetes-resources-access.png[Kubernetes monitoring access]
+
+Finally, you access the cluster view with *Infrastructure*, *Workloads* and *Services* where you can drill down to find some extra informations about components
+
+image:02_journey-with-istio-on-gke/04_kubernetes-resources.png[Kubernetes monitoring]
+
+This view will be used later in the formation, so keep a link to it !
+
+=== Stackdriver Trace
+
+You can access the Stackdriver trace through the cloud console, with the *Trace* component in the side bar.
+
+image:02_journey-with-istio-on-gke/05_stackdriver-trace-access.png[Stackdriver Trace access]
+
+So you access a screen which will presents the distributed traces inside your cluster. For now, of course, the system is empty 😅
+
+image:02_journey-with-istio-on-gke/06_stackdriver-trace.png[Stackdriver Trace]
+
+This view will be used later in the formation, so keep a link to it !
+
+=== Stackdriver Logs
+
+You can access the Stackdriver logs through the cloud console, with the *Logging* component in the side bar.
+
+image:02_journey-with-istio-on-gke/07_stackdriver-logging-access.png[Stackdriver Logging access]
+
+Here, you can see logs from all component of the cloud console, and especially in our case, the container and cluster logs
+
+image:02_journey-with-istio-on-gke/08_stackdriver-logging.png[Stackdriver Logging]
+
+This view will be used later in the formation, so keep a link to it !
