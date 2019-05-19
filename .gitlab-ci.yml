@@ -1,0 +1,11 @@
+image: antora/antora
+
+pages:
+  stage: deploy
+  script:
+    - site.yml
+  artifacts:
+      paths:
+      - build/site/
+  only:
+  - master
