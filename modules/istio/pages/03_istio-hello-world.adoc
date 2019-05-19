@@ -10,6 +10,16 @@ We should run the following command to deploy applications in the cluster:
 [source, bash]
 ----
 Λ\:$ kub apply -f /Users/kevin/Workspace/gitlab.com/stack-labs/Training/gcp-k8s-istio/apps/istio/demo-hello-world.yaml
+namespace/workshop created
+service/search created
+deployment.apps/search created
+virtualservice.networking.istio.io/search created
+destinationrule.networking.istio.io/search created
+service/ui created
+deployment.apps/ui-v1 created
+gateway.networking.istio.io/ui created
+virtualservice.networking.istio.io/ui created
+destinationrule.networking.istio.io/ui created
 ----
 
 After that, a namespace will be created with two components:
