@@ -3,3 +3,8 @@ micronaut:
         name: distance-calculator
     server:
         port: 8082
+    metrics:
+        enabled: true
+    info:
+        enabled: true
+        sensitive: false

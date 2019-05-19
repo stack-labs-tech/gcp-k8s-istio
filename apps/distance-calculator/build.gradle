@@ -30,6 +30,8 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}"
     compile "org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}"
     compile "io.micronaut:micronaut-runtime"
+    compile "io.micronaut.configuration:micronaut-micrometer-core"
+    compile "io.micronaut:micronaut-management"
     compile "javax.annotation:javax.annotation-api"
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.7"
     kapt "io.micronaut:micronaut-inject-java"
@@ -52,7 +54,7 @@ shadowJar {
 run.jvmArgs('-noverify', '-XX:TieredStopAtLevel=1')
 
 mainClassName = "com.stack_labs.workshop.Application"
-jib.to.image = 'stacklabs/distance-calculator:0.0.1'
+jib.to.image = 'stacklabs/distance-calculator:0.0.2'
 
 test {
     useJUnitPlatform()
