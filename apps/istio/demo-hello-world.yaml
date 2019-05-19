@@ -18,7 +18,6 @@ spec:
       port: 8080
   selector:
     app: search
-    version: v1
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -27,7 +26,7 @@ metadata:
   labels:
     app: search
     version: v1
-  name: search
+  name: search-v1
 spec:
   selector:
     matchLabels:
@@ -52,7 +51,7 @@ spec:
               path: /actuator/health
               port: 8181
             initialDelaySeconds: 20
-          name: app
+          name: search
           resources:
             requests:
               memory: "512Mi"

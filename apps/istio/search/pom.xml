@@ -106,7 +106,7 @@
                 <version>1.2.0</version>
                 <configuration>
                     <to>
-                        <image>docker.io/stacklabs/gke-and-istio-search</image>
+                        <image>docker.io/stacklabs/gke-and-istio-search:v2</image>
                     </to>
                 </configuration>
             </plugin>

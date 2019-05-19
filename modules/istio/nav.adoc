@@ -16,3 +16,6 @@
 ***     xref:03_istio-hello-world.adoc#generate-traffic[Generate traffic]
 ***     xref:03_istio-hello-world.adoc#traces[Traces]
 ***     xref:03_istio-hello-world.adoc#logging[Logging]
+
+**      xref:04-production-path-with-istio.adoc[4. Production path]
+***     xref:04-production-path-with-istio.adoc#mirroring[Traffic mirroring]

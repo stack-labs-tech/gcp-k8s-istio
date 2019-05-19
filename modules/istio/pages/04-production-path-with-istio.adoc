@@ -1,0 +1,179 @@
+= Production path with Istio
+
+The goal of this step is to discover the *Istio Way* of going to *production*. Thanks to the different functionality of Istio, we can improve our process of delivery inside a Kubernetes Cluster.
+
+Basically, we have to deploy the *Search* v2 but without any downtime and with assurance no error will occurs.
+
+[#setup]
+== Setup
+
+We will work on the demo mode like in the previous step and do some modification upon it
+
+[source, bash]
+----
+Λ\:$ kub apply -f /Users/kevin/Workspace/gitlab.com/stack-labs/Training/gcp-k8s-istio/apps/istio/demo-hello-world.yaml
+namespace/workshop created
+service/search created
+deployment.apps/search created
+virtualservice.networking.istio.io/search created
+destinationrule.networking.istio.io/search created
+service/ui created
+deployment.apps/ui-v1 created
+gateway.networking.istio.io/ui created
+virtualservice.networking.istio.io/ui created
+destinationrule.networking.istio.io/ui created
+----
+
+WARNING: Use the *workshop* namespace for all following operation.
+
+[#mirroring]
+== Traffic Mirroring
+
+One of the first solution to test an application is to deploy the new version and mirror the traffic of the standard one to the new version.
+
+First, we will deploy the *v2* version of the *Search* service. To do so, you have to apply the following yaml:
+
+[source, yaml]
+----
+apiVersion: v1
+kind: Service
+metadata:
+  name: search-v2
+  labels:
+    app: search
+    version: v2
+spec:
+  ports:
+    - name: http
+      port: 8080
+  selector:
+    app: search
+    version: v2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: search
+    version: v2
+  name: search-v2
+spec:
+  selector:
+    matchLabels:
+      app: search
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: search
+        version: v2
+    spec:
+      containers:
+        - image: stacklabs/gke-and-istio-search:v2-with-errors # <1>
+          imagePullPolicy: Always
+          env:
+            - name: SEARCH_VERSION
+              value: v2
+            - name: SEARCH_EVENT
+              value: "GKE + Istio Formation"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8181
+            initialDelaySeconds: 20
+          name: search
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+----
+<1> Special version of this service which randomly returns errors
+
+
+We can see the new deployment with the following command:
+
+[source, bash]
+----
+Λ\:$ kubectl get services,po
+NAME             TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+service/search   ClusterIP   10.121.4.224   <none>        8080/TCP   77s
+service/ui       ClusterIP   10.121.0.228   <none>        8080/TCP   53m
+
+NAME                             READY   STATUS    RESTARTS   AGE
+pod/search-v1-6b9967c46c-thcct   2/2     Running   0          3m8s
+pod/search-v2-7bf6c4ccc5-fn868   2/2     Running   0          8m37s
+pod/ui-v1-7f54ffb994-tvc89       2/2     Running   0          53m
+----
+
+Here, we don't have any specific elements about istio. Our app should answer like before, without problems.
+
+[source, bash]
+----
+Λ\:$ while true; curl -qs 35.228.54.223; echo ; end
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-19T20:18:05.468Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-19T20:18:06.887Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-19T20:18:07.426Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-19T20:18:08.875Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-19T20:18:09.892Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-19T20:18:11.4Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-19T20:18:13.059Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-19T20:18:13.946Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-19T20:18:15.03Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-19T20:18:15.855Z"}
+----
+
+Now, we will configure Istio to mirror all the traffic to *Search* v1 to *Search* v2, by applying this yaml:
+
+[source, yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: workshop
+  name: search
+spec:
+  hosts:
+    - search
+  http:
+    - route:
+        - destination:
+            host: search
+            subset: version-1
+      mirror: # <1>
+        host: search
+        subset: version-2
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  namespace: workshop
+  name: search
+spec:
+  host: search
+  subsets:
+    - name: version-1
+      labels:
+        version: v1
+    - name: version-2 # <2>
+      labels:
+        version: v2
+----
+<1> The mirror syntax to send all routed traffic to a specific subset
+<2> The definition of the specific subset by label
+
+We need to analyse the system, so we can define a graph in stackdriver monitoring to see this:
+
+image:04-production-path-with-istio/01_stackdriver-error-on-app-by-version.png[Analysing the mirroring traffic app]
+
+To generate the same graph, you have to define:
+
+* Resource Type: *Kubernetes Container*
+* Metric: *Log Entries*
+* Filter:
+** *severity = "ERROR"*
+** *namespace_name = "workshop"*
+* Group By:
+** user_labels.app
+** user_labels.version
+* Aggregator: *sum*
+
