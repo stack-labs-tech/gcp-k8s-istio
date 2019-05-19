@@ -13,7 +13,7 @@ We will learn how to:
 
 We first need to deploy the Redis backend before we can deploy the `travel-manager` :
 
-```
+```shell
 kubectl create -f manifests/app/pods/redis.yaml
 ```
 
@@ -31,25 +31,25 @@ Additionaly, we will need to expose `travel-manager` Pod *externally*.
 
 Explore `redis` service:
 
-```
+```shell
 cat manifests/app/services/redis.yaml
 ```
 
 Create the redis service using kubectl:
 
-```
+```shell
 kubectl create -f manifests/app/services/redis.yaml
 ```
 
 Do the same thing with the `distance-calculator` service:
 
-```
+```shell
 kubectl create -f manifests/app/services/distance-calculator.yaml
 ```
 
 Just like we did with pods, we can look at created services using `kubectl` command:
 
-```
+```shell
 kubectl get services
 ```
 
@@ -69,13 +69,13 @@ https://kubernetes.io/docs/concepts/services-networking/service/#publishing-serv
 
 To expose our `travel-manager` externally we will now deploy a service of type https://kubernetes.io/docs/concepts/services-networking/service/#nodeport[`NodePort`]:
 
-```
+```shell
 cat manifests/app/services/travel-manager-nodeport.yaml
 ```
 
 Now deploy this service:
 
-```
+```shell
 kubectl create -f manifests/app/services/travel-manager-nodeport.yaml
 ```
 
@@ -84,12 +84,13 @@ kubectl create -f manifests/app/services/travel-manager-nodeport.yaml
 ===== Hints
 
 List the GCP VMs which compose the GKE cluster:
-```
+
+```shell
 gcloud compute instances list
 ```
 
 Output
-```
+```shell
 NAME                                           ZONE            MACHINE_TYPE   PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP     STATUS
 gke-kube-cluster-default-pool-25c90f6c-nlft  europe-west1-b  n1-standard-2               10.132.0.12  35.195.16.10    RUNNING
 gke-kube-cluster-default-pool-25c90f6c-pl74  europe-west1-b  n1-standard-2               10.132.0.14  104.155.52.100  RUNNING
@@ -98,12 +99,13 @@ gke-kube-cluster-default-pool-25c90f6c-s71s  europe-west1-b  n1-standard-2      
 
 On GCE you need to add a firewall rule to enable Ingress traffic (i.e. traffic from anywhere to your GCP project):
 
-```
+```shell
 gcloud compute firewall-rules create travel-manager-service --allow tcp:31000
 ```
 
 Then use any of the `External IP` to connect to the NodePort
-```
+
+```shell
 curl -k https://<EXTERNAL_IP>:31000
 ```
 
@@ -115,11 +117,11 @@ curl -k https://<EXTERNAL_IP>:31000
 
 ===== Hints
 
-```
+```shell
 kubectl get services travel-manager
 ```
 
-```
+```shell
 kubectl describe services travel-manager
 ```
 
@@ -133,11 +135,11 @@ kubectl describe services travel-manager
 
 Currently the `travel-manager` service does not have any endpoints. One way to troubleshoot an issue like this is to use the `kubectl get pods` command with a label query.
 
-```
+```shell
 kubectl get pods -l "app=travel-manager
 ```
 
-```
+```shell
 kubectl get pods -l "app=travel-manager,version=v1"
 ```
 
@@ -145,13 +147,13 @@ kubectl get pods -l "app=travel-manager,version=v1"
 
 Use the `kubectl label` command to add the missing `version=v1` label to the `travel-manager` Pod.
 
-```
+```shell
 kubectl label pods travel-manager 'version=v1'
 ```
 
 View the list of endpoints on the `travel-manager` service:
 
-```
+```shell
 kubectl describe services travel-manager
 ```
 
@@ -163,11 +165,11 @@ kubectl describe services travel-manager
 
 ===== Hints
 
-```
+```shell
 gcloud compute instances list
 ```
 
-```
+```shell
 curl -k https://<EXTERNAL_IP>:31000
 ```
 
@@ -177,13 +179,13 @@ In this exercise you will observe what happens when a required label is removed 
 
 Use the `kubectl label` command to remove the `type` label from the `travel-manager` Pod.
 
-```
+```shell
 kubectl label pods travel-manager type-
 ```
 
 View the list of endpoints on the `travel-manager` service:
 
-```
+```shell
 kubectl describe services travel-manager
 ```
 
@@ -198,13 +200,13 @@ kubectl describe services travel-manager
 
 We usually use a `LoadBalancer` service type instead, and GKE will manage everything for us. Let's try that. We first need to delete the old service:
 
-```
+```shell
 kubectl delete svc travel-manager
 ```
 
 Observe the new service with `LoadBalancer`:
 
-```
+```shell
 cat manifests/app/services/travel-manager-nodeport.yaml
 ```
 
@@ -212,19 +214,19 @@ TIP: What is the difference with the `NodePort` version ?
 
 We are now ready to create our `LoadBalancer` service:
 
-```
+```shell
 kubectl create -f manifests/app/services/travel-manager-nodeport.yaml
 ```
 
 Wait until a stable external IP address has been assigned to our LoadBalancer by running the following command:
 
-```
+```shell
 watch kubectl get svc travel-manager --output yaml
 ```
 
 Once you have a value under status.loadBalancer.ingress.ip`, you can query the `travel-manager` service from the outside world by running a simple curl:
 
-```
+```shell
 curl http://<INGRESS_IP>:60000/travels
 ```
 

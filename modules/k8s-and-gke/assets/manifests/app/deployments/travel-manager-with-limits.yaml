@@ -12,11 +12,18 @@ spec:
     spec:
       containers:
         - name: travel-manager
-          image: stacklabs/travel-manager:0.0.1
+          image: stacklabs/travel-manager:0.0.2
           imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8081
+          resources:
+            requests:
+              cpu: 0.2
+              memory: "200Mi"
+            limits:
+              cpu: 0.2
+              memory: "300Mi"
           env:
             - name: "REDIS_HOST"
               value: "standalone-redis"

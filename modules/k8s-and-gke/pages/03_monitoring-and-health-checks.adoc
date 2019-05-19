@@ -27,13 +27,13 @@ In this chapter you will learn how to:
 
 Explore the `distance-calculator` pod configuration file:
 
-```
+```shell
 cat manifests/app/pods/distance-calculator-with-probes.yaml
 ```
 
 Create the new `distance-calculator` pod using kubectl:
 
-```
+```shell
 kubectl apply -f manifests/app/pods/distance-calculator-with-probes.yaml
 ```
 
@@ -43,7 +43,7 @@ Pods will not be marked ready until the readiness probe returns an HTTP 200 resp
 
 === Hints
 
-```
+```shell
 kubectl describe pods <pod-name>
 ```
 
@@ -62,7 +62,7 @@ In this tutorial you will observe how Kubernetes responds to failed readiness pr
 
 Use the `kubectl port-forward` command to forward a local port to the health port of the `distance-calculator` Pod.
 
-```
+```shell
 kubectl port-forward distance-calculator 10081:8082
 ```
 
@@ -72,13 +72,13 @@ kubectl port-forward distance-calculator 10081:8082
 
 Force the `distance-calculator` container readiness probe to fail. Use the `curl` command to toggle the readiness probe status:
 
-```
+```shell
 curl http://127.0.0.1:10081/probes/readiness/fail
 ```
 
 Wait about 45 seconds and get the status of the `distance-calculator` Pod using the `kubectl get pods` command:
 
-```
+```shell
 watch kubectl get pods distance-calculator
 ```
 
@@ -86,7 +86,7 @@ TIP: `watch` has been added to the command so you don't have to run it the comma
 
 Use the `kubectl describe` command to get more details about the failing readiness probe:
 
-```
+```shell
 kubectl describe pods distance-calculator
 ```
 
@@ -94,13 +94,13 @@ kubectl describe pods distance-calculator
 
 Force the `distance-calculator` container readiness probe to pass. Use the `curl` command to toggle the readiness probe status:
 
-```
+```shell
 curl http://127.0.0.1:10081/probes/readiness/success
 ```
 
 Wait about 15 seconds and get the status of the `distance-calculator` Pod using the `kubectl get pods` command:
 
-```
+```shell
 watch kubectl get pods distance-calculator
 ```
 
@@ -110,11 +110,11 @@ Building on what you learned in the previous tutorial use the `kubectl port-forw
 
 === Hints
 
-```
+```shell
 kubectl port-forward distance-calculator 10081:8082
 ```
 
-```
+```shell
 curl http://127.0.0.1:10081/probes/liveness/fail
 ```
 

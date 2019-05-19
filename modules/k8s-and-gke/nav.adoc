@@ -17,4 +17,5 @@
 *** xref:06_creating-and-managing-services.adoc#lb[External service: LoadBalancer]
 ** xref:07_creating-and-managing-deployments.adoc[7. Deployments & Scaling]
 ** xref:08_rolling-out-updates.adoc[8. Rolling-upgrade]
+** xref:09_resources-limiting.adoc[9. Resource Limiting]
 ** xref:09_cleanup.adoc[9. Cleanup]

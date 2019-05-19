@@ -3,31 +3,21 @@
 
 Kubernetes makes it easy to rollout updates to your applications using the builtin rolling update mechanism. In this chapter you will learn how to:
 
-* Modify deployments to tigger rolling updates
+* Modify deployments to trigger rolling updates
 * Pause and resume an active rolling update
 * Rollback a deployment to a previous revision
 
-== Tutorial: Rollout a new version of the Auth service
+== Tutorial: Rollout a new version of the Travel Manager service
 
-First look at the current history of the __Deployment__ resource for the `auth` service:
+First look at the current history of the __Deployment__ resource for the `travel-manager` service:
 ```shell
-kubectl rollout history deployment auth
+kubectl rollout history deployment travel-manager
 ```
 
-Then modify the auth deployment to replace the pod's container image version. Edit the yaml file.
+Then deploy the travel-manager` deployment` in a newer version (v2) to replace the pod's container image version. With `kubectl apply`, you can live-update a deployment. `--record` option let you keep a trace of the commands related to each deployment change:
 ```shell
-vim manifests/app/deployments/auth.yaml
-```
-
-Look for following line and upgrade version 1.0.0 to 2.0.0:
-```
-image: "kelseyhightower/auth:1.0.0"
-```
-
-With `kubectl apply`, you can live-update a deployment. `--record` option let you keep a trace of the commands related to each deployment change:
-```shell
-kubectl apply -f manifests/app/deployments/auth.yaml --record
-kubectl describe deployments auth
+kubectl apply -f manifests/app/deployments/travel-manager-v2.yaml --record
+kubectl describe deployments travel-manager
 ```
 
 If you list __ReplicaSets__, you'll see one for the original version and the other for the new version.
@@ -37,45 +27,62 @@ kubectl get replicasets
 
 Now list __Deployment__ history again to see your change history.
 ```shell
-kubectl rollout history deployment auth
+kubectl rollout history deployment travel-manager
 ```
 In fact, __Deployment__ history is backed by the __ReplicaSet__
+
+Just to be sure, make sure you check that the v2 has been correctly deployed:
+
+```shell
+curl http://<INGRESS_IP>:60000/version
+```
+
+You should now see '0.0.2'.
 
 == Tutorial: Pause and Resume an Active Rollout
 
 Let's try to see a deployment in progress.
 
-First scale the hello Deployment to 6 pods:
+First scale the distance-calculator Deployment to 6 pods:
 ```shell
-kubectl scale deployments hello --replicas=6
+kubectl scale deployments distance-calculator --replicas=6
 ```
 
 Look at your __Deployment__ history.
 ```shell
-kubectl rollout history deployment hello
+kubectl rollout history deployment distance-calculator
 ```
 
-Now modify the hello deployment image to update `hello` docker image`s version:
+Now modify the distance-calculator deployment image to update `distance-calculator` docker image`s version:
 ```shell
-sed -i .bak 's/hello:1.0.0/hello:2.0.0/' manifests/app/deployments/hello.yaml
+sed -i .bak 's/distance-calculator:1.0.0/distance-calculator:2.0.0/' manifests/app/deployments/distance-calculator.yaml
 ```
 Now, run following commands all together:
 ```shell
-kubectl apply -f manifests/app/deployments/hello.yaml --record
-kubectl describe deployments hello
-kubectl rollout pause deployment hello
+kubectl apply -f manifests/app/deployments/distance-calculator.yaml --record
+kubectl describe deployments distance-calculator
+kubectl rollout pause deployment distance-calculator
 ```
 
 You'll see the __Deployment__ rolling-upgrade stopped in the middle.
 
 Resume the rollout to terminates the rolling-upgrade.
-```
-kubectl rollout resume deployment hello
+
+```shell
+kubectl rollout resume deployment distance-calculator
 ```
 
 == Exercise: Rollback the Hello service
 
-Use the `kubectl rollout undo` command to rollback to a previous deployment of the Hello service.
+Use the `kubectl rollout undo deploy travel-manager` command to rollback to a previous deployment of the Travel Manager service.
+
+After a few seconds check that you are back on version v1:
+
+```shell
+curl http://<INGRESS_IP>:60000/version
+```
+
+You should now see '0.0.1'.
 
 == Summary
 

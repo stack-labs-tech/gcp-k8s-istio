@@ -1,0 +1,95 @@
+= Resource Limiting
+
+So far we have been deploying _Pods_ without really taking care of how much resources were allocated for us by Kubernetes. However specifying resources can help Kubernetes scheduler, as mentioned in the https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/[documentation]:
+
+> When Containers have resource requests specified, the scheduler can make better decisions about which nodes to place Pods on. And when Containers have their limits specified, contention for resources on a node can be handled in a specified manner
+
+== Tutorial: Specifying resources request and limit
+
+First, let's check the current resources usage using `kubectl top`:
+
+```shell
+kubectl top pods
+```
+
+You should see something similar to this:
+
+image::kubectl-top-pods.png[]
+
+We can also check the cluster overall memory and CPU usage (node per node) using:
+
+```shell
+kubectl top nodes
+```
+
+image::kubectl-top-nodes.png[]
+
+We will now add resources request and limit for memory and CPU to our `travel-manager` application:
+
+```yaml
+requests:
+  cpu: 0.2
+  memory: "200Mi"
+limits:
+  cpu: 0.2
+  memory: "300Mi"
+```
+
+What we are saying here is:
+
+* Each `travel-manager` container should have exactly 0.2 CPU (== 20% of a GCP Core)
+* Each `travel-manager` container should have at least 200MiB memory allocated, and at most 300MiB.
+
+TIP: Instead of writing `0.2` CPU we could have expressed this in "millicores" by requesting `200m`.
+
+Replace our old deployment by the same deployment with resources requests/limits:
+
+```shell
+kubectl apply -f manifests/app/deployments/travel-manager-with-limits.yaml
+```
+
+After a few seconds you should see the updated resources:
+
+```shell
+kubectl top pods
+```
+
+What happens if the sum of all requested resources are over the total available resources on nodes ? Well... let's try !
+
+We have a cluster of 3 nodes of 2 GCP Core each, which mean we should be able to assign around 30 Pods of 200m CPU each. Let's scale do to exactly that:
+
+```shell
+kubectl scale deployments travel-manager --replicas=30
+```
+
+=== Quizz
+
+* How many _Pods_ of `travel-manager` were actually deployed ?
+* How many _Pods_ of `travel-manager` are staying in `Pending` status ?
+* What is the error message on `Pending` _Pods_ ?
+
+==== Hints
+
+```shell
+kubectl get pods --field-selector=status.phase='Running'
+```
+
+```shell
+kubectl get pods --field-selector=status.phase='Pending'
+```
+
+```shell
+kubectl describe pod <A_PENDING_POD_ID>
+```
+
+=== Cleanup
+
+Let's scale back to 3 replicas:
+
+```shell
+kubectl scale deployments travel-manager --replicas=3
+```
+
+== Summary
+
+In this chapter you learned how to add resources requests and limits so that Kubernetes scheduler is able to better manage where it puts our _Pods_. It will also facilitates autoscaling and such.
