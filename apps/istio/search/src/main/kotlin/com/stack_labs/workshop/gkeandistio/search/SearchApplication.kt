@@ -39,13 +39,14 @@ class SearchHandler(prop: SearchProperties) {
     val version = prop.version
     val event = prop.event
 
-    val requestWaitingRange = (0..1000).map(Int::toLong)
-    val errorRate = prop.errorRate * 10
+    val requestWaitingRange = (0..prop.maxLatency).map(Int::toLong)
+    val errorProbability = 0..100
+    val errorRate = prop.errorRate
 
     fun serve(serverRequest: ServerRequest): Mono<ServerResponse> {
 
-        val duration = requestWaitingRange.shuffled().first()
-        val error = requestWaitingRange.shuffled().first() > errorRate
+        val duration = requestWaitingRange.shuffled().first().apply { log.info("Duration will be $this ms") }
+        val error = errorProbability.shuffled().first() >= errorRate
 
         return if (error) {
             ok()

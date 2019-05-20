@@ -12,4 +12,5 @@ class SearchProperties {
     lateinit var version: String
     lateinit var event: String
     var errorRate: Int = 0
+    var maxLatency: Int = 1000
 }
