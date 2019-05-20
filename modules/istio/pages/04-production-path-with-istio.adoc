@@ -192,6 +192,7 @@ In order to fix the issue, we will deploy a working version of the v2 applicatio
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: workshop
   name: search-v2
   labels:
     app: search
@@ -207,10 +208,11 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: search-v2
+  namespace: workshop
   labels:
     app: search
     version: v2
-  name: search-v2
 spec:
   selector:
     matchLabels:
@@ -244,3 +246,83 @@ spec:
 <1> the version which not fails 👍
 
 You can now see errors raising down from the stackdriver graph and the logs of your application printing less errors.
+
+[#canary-release]
+== Canary release
+
+The main goal of a canary release it to be able to deploy 2 version of a service and let the user decide if he wants to access the "canary" release.
+
+To do this step, you should first be sure you have deployed *UI* v1 and *Search* v1 & v2 in your cluster.
+
+[source, bash]
+----
+Λ\:$ kubectl get services,po
+NAME             TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+service/search   ClusterIP   10.121.4.224   <none>        8080/TCP   77s
+service/ui       ClusterIP   10.121.0.228   <none>        8080/TCP   53m
+
+NAME                             READY   STATUS    RESTARTS   AGE
+pod/search-v1-6b9967c46c-thcct   2/2     Running   0          3m8s
+pod/search-v2-7bf6c4ccc5-fn868   2/2     Running   0          8m37s
+pod/ui-v1-7f54ffb994-tvc89       2/2     Running   0          53m
+----
+
+Then, the goal here is to use the `HTTPMatchRequest` (https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/#HTTPMatchRequest[documentation]) to control the traffic depending of the value of the *http-header* `x-formation-search`.
+
+[source, yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: workshop
+  name: search
+spec:
+  hosts:
+    - search
+  http:
+    - match:
+        - headers:
+            x-formation-search:
+              exact: next # <1>
+      route:
+        - destination:
+            host: search
+            subset: version-2 <2>
+    - route:
+        - destination:
+            host: search
+            subset: version-1 <3>
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  namespace: workshop
+  name: search
+spec:
+  host: search
+  subsets:
+    - name: version-1
+      labels:
+        version: v1
+    - name: version-2
+      labels:
+        version: v2
+----
+<1> The parameter which allow to redirect traffic to a specific destination
+<2> The route -> destination used if the request match
+<3> The default route if nothing match
+
+[source, bash]
+----
+Λ\:$ curl 35.228.32.51
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T16:55:58.391Z"}
+Λ\:$ curl 35.228.32.51 -H "x-formation-search: next"
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v2)","date":"2019-05-20T16:56:45.613Z"}
+Λ\:$ curl 35.228.32.51 -H "x-formation-search: other"
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T16:57:33.823Z"}
+----
+
+This is possible only because the *UI* application forwards all incoming headers with name `x-formation-search` to others micro services.
+
+TIP: This is possible thanks to Spring Cloud Sleuth in our context, or this can be manually in our app
+
