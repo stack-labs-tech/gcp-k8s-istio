@@ -19,3 +19,5 @@
 
 **      xref:04-production-path-with-istio.adoc[4. Production path]
 ***     xref:04-production-path-with-istio.adoc#mirroring[Traffic mirroring]
+***     xref:04-production-path-with-istio.adoc#canary-release[Canary release]
+***     xref:04-production-path-with-istio.adoc#traffic-splitting[Traffic Splitting]

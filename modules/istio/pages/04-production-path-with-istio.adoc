@@ -287,11 +287,11 @@ spec:
       route:
         - destination:
             host: search
-            subset: version-2 <2>
+            subset: version-2 # <2>
     - route:
         - destination:
             host: search
-            subset: version-1 <3>
+            subset: version-1 # <3>
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
@@ -330,5 +330,84 @@ TIP: This is possible thanks to Spring Cloud Sleuth in our context, or this can 
 * Create a dashboard in stackdriver monitoring to follow the traffic coming into this version of the application
 * Follow logs execution of both application in parallels in Stackdriver logging
 * Follow the distributed traces inside Stackdriver trace
+
+[#traffic-splitting]
+== Traffic Splitting
+
+The main goal of traffic splitting is to increase the traffic on the new version of the application, directly managed by YAML files.
+
+To do this step, you should first be sure you have deployed *UI* v1 and *Search* v1 & v2 in your cluster.
+
+[source, bash]
+----
+Λ\:$ kubectl get services,po
+NAME             TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+service/search   ClusterIP   10.121.4.224   <none>        8080/TCP   77s
+service/ui       ClusterIP   10.121.0.228   <none>        8080/TCP   53m
+
+NAME                             READY   STATUS    RESTARTS   AGE
+pod/search-v1-6b9967c46c-thcct   2/2     Running   0          3m8s
+pod/search-v2-7bf6c4ccc5-fn868   2/2     Running   0          8m37s
+pod/ui-v1-7f54ffb994-tvc89       2/2     Running   0          53m
+----
+
+Then, the goal here is to use weight property on routes to let the proxy due the distribution between routes for you.
+
+[source, yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: workshop
+  name: search
+spec:
+  hosts:
+    - search
+  http:
+    - route:
+        - destination:
+            host: search
+            subset: version-2
+          weight: 10 # <1>
+        - destination:
+            host: search
+            subset: version-1
+          weight: 90 # <2>
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  namespace: workshop
+  name: search
+spec:
+  host: search
+  subsets:
+    - name: version-1
+      labels:
+        version: v1
+    - name: version-2
+      labels:
+        version: v2
+----
+<1> The weight of the route to the version-2 subset
+<2> The weight of the route to the version-1 subset
+
+[source, bash]
+----
+Λ\:~ kevin $ while true;  curl -qs 35.228.32.51; echo; end
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T17:14:51.58Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T17:14:52.046Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T17:14:54.16Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v2)","date":"2019-05-20T17:14:55.003Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T17:14:56.272Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T17:14:57.954Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v2)","date":"2019-05-20T17:14:59.35Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T17:15:00.824Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T17:15:02.409Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T17:15:03.184Z"}
+----
+
+*More*:
+* Trigger a complete delivery from v1 to v2 of the *Search* service while your application is under *Siege*. Do you have any unavailability ?
 
 
