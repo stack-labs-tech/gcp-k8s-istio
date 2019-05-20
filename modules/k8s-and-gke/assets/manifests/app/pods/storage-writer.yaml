@@ -4,21 +4,23 @@ metadata:
   name: storage-writer
   labels:
     app: storage-writer
-  spec:
-    containers:
-      - name: storage-writer
-        image: stacklabs/storage-writer:0.0.1
-        imagePullPolicy: Always
-        volumeMounts:
-          - name: "api-key"
-            mountPath: "/api-key.json"
-        ports:
-          - name: http
-            containerPort: 8083
-        env:
-          - name: GOOGLE_APPLICATION_CREDENTIALS
-            value: /api-key.json
-    volumes:
-      - name: "api-key"
-        secret:
-          secretName: "gcs-admin-key"
+spec:
+  containers:
+    - name: storage-writer
+      image: stacklabs/storage-writer:0.0.1
+      imagePullPolicy: Always
+      volumeMounts:
+        - name: "api-key"
+          mountPath: "/api"
+      ports:
+        - name: http
+          containerPort: 8083
+      env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /api/<API_KEY_FILENAME>.json
+        - name: BUCKET
+          value: <UNIQUE_BUCKET_NAME>
+  volumes:
+    - name: "api-key"
+      secret:
+        secretName: "gcs-admin-key"

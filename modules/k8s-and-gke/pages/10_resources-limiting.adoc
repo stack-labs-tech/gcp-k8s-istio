@@ -1,3 +1,4 @@
+[#resources-limiting]
 = Resource Limiting
 
 So far we have been deploying _Pods_ without really taking care of how much resources were allocated for us by Kubernetes. However specifying resources can help Kubernetes scheduler, as mentioned in the https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/[documentation]:
@@ -48,6 +49,12 @@ Replace our old deployment by the same deployment with resources requests/limits
 kubectl apply -f manifests/app/deployments/travel-manager-with-limits.yaml
 ```
 
+Let's also update our Redis instance with some memory resources request/limit:
+
+```shell
+kubectl apply -f manifests/app/deployments/redis-with-cpu.yaml
+```
+
 After a few seconds you should see the updated resources:
 
 ```shell
@@ -81,6 +88,40 @@ kubectl get pods --field-selector=status.phase='Pending'
 ```shell
 kubectl describe pod <A_PENDING_POD_ID>
 ```
+
+[#qos]
+== Tutorial: Handling QoS classes
+
+Did you notice the different type of quality classes our services had so far ? No ? Now is the time ! As always, describe is your best friend...
+
+```shell
+kubectl get po redis --output yaml | grep qos
+kubectl get po travel-manager --output yaml | grep qos
+kubectl get po distance-calculator --output yaml | grep qos
+```
+
+As you can see, there are 3 different types of QoS classes:
+
+|===
+|QoS Class |Condition|Description|Eviction on resources claim
+
+|Guaranteed
+|Must memory + CPU request & limit set for all containers
+|Is guaranteed to run on a node that has available resources
+|Pods of this class are the last to be evicted
+
+|Burstable
+|At least one container has either CPU or memory request
+|Pods are not guaranteed to be on nodes with sufficient resources
+|Pods of this class will be evicted after best effort pods but before guaranteed pods
+
+|Best Effort
+|No resources limiting is defined
+|Pods are not guaranteed to be on nodes with sufficient resources
+|Pods of this class will be the first evicted
+|===
+
+When possible it is good practice to specify resources requests and limits as it tells Kubernetes scheduler how to scale correctly our _Pods_.
 
 === Cleanup
 

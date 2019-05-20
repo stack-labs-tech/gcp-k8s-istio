@@ -52,7 +52,7 @@ kubectl apply -f manifests/app/pods/distance-calculator-with-distances.yaml
 Forward local port 10080 to 8082 of the `distance-calculator` Pod:
 
 ```
-kubectl port-forward distance-calculator-with-distances 10080:8082
+kubectl port-forward distance-calculator 10080:8082
 ```
 
 Use the `curl` command to test the endpoint:

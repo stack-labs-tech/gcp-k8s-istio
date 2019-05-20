@@ -39,7 +39,7 @@ Now deploy the pod just as we did before:
 kubectl apply -f manifests/app/pods/nginx.yaml
 ```
 
-NOTE: If you still have the old `nginx` Pod running, run a `kubectl delete pod nginx` before you apply this new Pod.
+NOTE: If you still have the old `nginx` Pod running, run a `kubectl delete deploy nginx` before you apply this new Pod.
 
 Once deployed, execute a shell into this nginx container:
 

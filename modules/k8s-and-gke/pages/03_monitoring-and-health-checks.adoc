@@ -25,6 +25,12 @@ In this chapter you will learn how to:
 
 == Tutorial: Creating Pods with Liveness and Readiness Probes
 
+First delete the old `distance-calculator`:
+
+```shell
+kubectl delete po distance-calculator
+```
+
 Explore the `distance-calculator` pod configuration file:
 
 ```shell
