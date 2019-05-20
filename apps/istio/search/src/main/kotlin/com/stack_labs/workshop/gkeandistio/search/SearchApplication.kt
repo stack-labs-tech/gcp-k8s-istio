@@ -53,7 +53,7 @@ class SearchHandler(prop: SearchProperties) {
                     .delayElement(ofMillis(duration))
                     .doOnNext { log.info("Search service called and respond with event \"$event:$version\" ") }
         } else {
-            ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Random error 🔥").toMono()
+            ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Random error 🔥").toMono()
         }
     }
 }

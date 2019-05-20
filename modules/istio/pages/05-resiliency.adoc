@@ -400,6 +400,155 @@ More:
 * You can follow execution logs of the envoy proxy to see what's happening during traffic exclusion
 * You can follow errors rate inside the stackdriver console to see the number of request handled by each pods
 
+[#pool-ejection]
+== Pool Ejection
 
+This principe allows Istio to cancel all traffic to a pod when this one returns too many errors ( >= 502 http error code).
+That will reduce the incoming traffic, letting the pod cool down for few minutes before coming back to the pool.
+
+NOTE: To see this in action, you should install *stern* which let us follow logs of multiple pods at once and adding prefix / coloration to each logs
+
+In this step, we will publish another version of the *Search* v1 but with a high error rate. To do so, you should apply the following *YAML*
+
+[source,yaml]
+----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: workshop
+  labels:
+    app: search
+    version: v1
+  name: search-v1-with-too-many-errors
+spec:
+  selector:
+    matchLabels:
+      app: search
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: search
+        version: v1
+    spec:
+      containers:
+        - image: stacklabs/gke-and-istio-search:latest
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_CLOUD_GCP_LOGGING_PROJECT_ID
+              value: istio-csm
+            - name: SEARCH_VERSION
+              value: v1
+            - name: SEARCH_EVENT
+              value: "GKE + Istio Formation"
+            - name: SEARCH_ERROR_RATE
+              value: "75"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8181
+            initialDelaySeconds: 20
+          name: search
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: 1
+            limits:
+              memory: "512Mi"
+              cpu: 1
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+----
+
+Use stern to follow logs of both pods at same time:
+
+[source,bash]
+----
+Λ\:~ kevin $ kt search -t -c search
+search-v1-65b684bd54-bbt4d search 2019-05-20T20:20:48.025575791Z {"traceId":"b32b5b724cf05561","spanId":"4b49b5f6ab7cd9c4","spanExportable":"false","X-B3-ParentSpanId":"e682d580f4bebe9f","parentId":"e682d580f4bebe9f","timestampSeconds":1558383648,"timestampNan
+os":25000000,"severity":"INFO","thread":"parallel-1","logger":"com.stack_labs.workshop.gkeandistio.search.SearchHandler","message":"Search service called and respond with event \"GKE + Istio Formation:v1\" ","context":"default","logging.googleapis.com/trace":"
+projects/istio-csm/traces/0000000000000000b32b5b724cf05561","logging.googleapis.com/spanId":"4b49b5f6ab7cd9c4"}
+search-v1-with-too-many-errors-5cc9fd5dcf-9ff2k search 2019-05-20T20:20:52.134866938Z {"traceId":"4a373ff833ff37a8","spanId":"a5aa55c7e3820b25","spanExportable":"false","X-B3-ParentSpanId":"ee835d8558d426c7","parentId":"ee835d8558d426c7","timestampSeconds":155
+8383652,"timestampNanos":132000000,"severity":"ERROR","thread":"reactor-http-epoll-3","logger":"org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler... }
+search-v1-65b684bd54-bbt4d search 2019-05-20T20:20:49.493012601Z {"traceId":"7850535d1067be34","spanId":"7c0995afdd1986eb","spanExportable":"false","X-B3-ParentSpanId":"cdc10b5705e0461c","parentId":"cdc10b5705e0461c","timestampSeconds":1558383649,"timestampNan
+os":491000000,"severity":"INFO","thread":"parallel-1","logger":"com.stack_labs.workshop.gkeandistio.search.SearchHandler","message":"Search service called and respond with event \"GKE + Istio Formation:v1\" ","context":"default","logging.googleapis.com/trace":
+"projects/istio-csm/traces/00000000000000007850535d1067be34","logging.googleapis.com/spanId":"7c0995afdd1986eb"}
+search-v1-with-too-many-errors-5cc9fd5dcf-9ff2k search 2019-05-20T20:20:52.134866938Z {"traceId":"4a373ff833ff37a8","spanId":"a5aa55c7e3820b25","spanExportable":"false","X-B3-ParentSpanId":"ee835d8558d426c7","parentId":"ee835d8558d426c7","timestampSeconds":155
+8383652,"timestampNanos":132000000,"severity":"ERROR","thread":"reactor-http-epoll-3","logger":"org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler... }
+----
+
+And you will use the `curl` command to execute multiple call sequentially:
+
+[source,bash]
+----
+Λ\:$ while true;  curl -qs 35.228.32.51; echo; end
+{"timestamp":"2019-05-20T20:18:35.311+0000","path":"/","status":500,"error":"Internal Server Error","message":"500 Internal Server Error"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:18:36.639Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:18:38.312Z"}
+{"timestamp":"2019-05-20T20:18:38.901+0000","path":"/","status":500,"error":"Internal Server Error","message":"500 Internal Server Error"}
+{"timestamp":"2019-05-20T20:18:39.265+0000","path":"/","status":500,"error":"Internal Server Error","message":"500 Internal Server Error"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:18:40.781Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:18:41.811Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:18:43.13Z"}
+{"timestamp":"2019-05-20T20:18:43.737+0000","path":"/","status":500,"error":"Internal Server Error","message":"500 Internal Server Error"}
+----
+
+You can see a lots of errors comming from the same pod. To use the *Pool Ejection* (https://istio.io/docs/reference/config/networking/v1alpha3/destination-rule/#OutlierDetection), you have to apply this *YAML*:
+
+[source,YAML]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  namespace: workshop
+  name: search
+spec:
+  host: search
+  subsets:
+    - name: version-1
+      labels:
+        version: v1
+      trafficPolicy:
+        connectionPool:
+          http: {}
+          tcp: {}
+        outlierDetection:
+          baseEjectionTime: 10.000s
+          consecutiveErrors: 1
+          interval: 1.000s
+          maxEjectionPercent: 100
+----
+
+By following the logs in the *stern* view (you can only follow pods *search-v1-with* pattern), you will find a some moment where the pod didn't receive any request... almost every 10 seconds.
+
+The execution command should look like this:
+
+[source, bash]
+---
+Λ\:$ while true;  curl -qs 35.228.32.51; echo; end
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:43:36.912Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:43:38.799Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:43:40.678Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:43:41.488Z"}
+{"timestamp":"2019-05-20T20:43:42.134+0000","path":"/","status":500,"error":"Internal Server Error","message":"503 Service Unavailable"} <1>
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:43:43.523Z"} <2>
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:43:44.678Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:43:45.872Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:43:46.984Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:43:48.486Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:43:49.791Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:43:50.244Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:43:52.101Z"}
+---
+<1> The pods answer with a invalid response, it will be evicted during 10s
+<2> Next requests are only handle by other pods
+
+More:
+
+* You can use the previously created dashboard to see the request count of each pods inside the cluster
+
+NOTE: The ejection-time is *equal to the product of minimum ejection duration and the number of times the host has been ejected*
 
 
