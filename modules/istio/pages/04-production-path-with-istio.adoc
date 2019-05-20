@@ -245,3 +245,5 @@ spec:
 
 You can now see errors raising down from the stackdriver graph and the logs of your application printing less errors.
 
+[#mirroring]
+== Traffic Mirroring

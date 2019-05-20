@@ -3,3 +3,7 @@ ui:
   version: v1
 
 management.server.port: 8181
+
+spring:
+  sleuth:
+    propagation-keys: x-formation-search
