@@ -167,4 +167,111 @@ More:
 
 * Use stackdriver to represents the round-trip total time of a request in the mesh
 
+[#Timeout]
+== Timeout
+
+Every language, every client http has its own way to configure default timeout... right now, with Istio you can define for all calls a default timeout for a specific route.
+
+To do so, you have to apply this *YAML*:
+
+
+[source, yaml]
+----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: workshop
+  labels:
+    app: search
+    version: v1
+  name: search-v1
+spec:
+  selector:
+    matchLabels:
+      app: search
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: search
+        version: v1
+    spec:
+      containers:
+        - image: stacklabs/gke-and-istio-search:latest
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_CLOUD_GCP_LOGGING_PROJECT_ID
+              value: istio-csm
+            - name: SEARCH_VERSION
+              value: v1
+            - name: SEARCH_EVENT
+              value: "GKE + Istio Formation"
+            - name: SEARCH_MAX_LATENCY
+              value: "6000" # <1>
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8181
+            initialDelaySeconds: 20
+          name: search
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: 1
+            limits:
+              memory: "512Mi"
+              cpu: 1
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: workshop
+  name: search
+spec:
+  hosts:
+    - search
+  http:
+    - route:
+        - destination:
+            host: search
+            subset: version-1
+      timeout: 500ms # <2>
+----
+1. Define the max latency to 6000ms
+2. Define the timeout to 500ms
+
+Following the result in the command line give us this:
+
+[source, bash]
+----
+Λ\:~ kevin $ while true; curl 35.228.32.51; echo; end
+
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T22:07:39.382Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T22:07:39.852Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T22:07:41.011Z"} <1>
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T22:07:42.091Z"}
+{"timestamp":"2019-05-20T22:07:42.883+0000","path":"/","status":500,"error":"Internal Server Error","message":"504 Gateway Timeout"}
+{"timestamp":"2019-05-20T22:07:43.908+0000","path":"/","status":500,"error":"Internal Server Error","message":"504 Gateway Timeout"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T22:07:44.815Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T22:07:45.939Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T22:07:46.965Z"}
+{"timestamp":"2019-05-20T22:07:47.957+0000","path":"/","status":500,"error":"Internal Server Error","message":"504 Gateway Timeout"}
+{"timestamp":"2019-05-20T22:07:49.009+0000","path":"/","status":500,"error":"Internal Server Error","message":"504 Gateway Timeout"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T22:07:49.814Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T22:07:51.213Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T22:07:52.432Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T22:07:53.195Z"}
+{"timestamp":"2019-05-20T22:07:53.827+0000","path":"/","status":500,"error":"Internal Server Error","message":"504 Gateway Timeout"}
+{"timestamp":"2019-05-20T22:07:54.764+0000","path":"/","status":500,"error":"Internal Server Error","message":"504 Gateway Timeout"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T22:07:55.59Z"}
+{"timestamp":"2019-05-20T22:07:56.625+0000","path":"/","status":500,"error":"Internal Server Error","message":"504 Gateway Timeout"}
+{"timestamp":"2019-05-20T22:07:57.493+0000","path":"/","status":500,"error":"Internal Server Error","message":"504 Gateway Timeout"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T22:07:59.005Z"}
+{"timestamp":"2019-05-20T22:07:59.645+0000","path":"/","status":500,"error":"Internal Server Error","message":"504 Gateway Timeout"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T22:08:00.736Z"}
+----
+1. YAML is applied here
 
