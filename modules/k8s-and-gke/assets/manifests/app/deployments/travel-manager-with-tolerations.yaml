@@ -29,3 +29,8 @@ spec:
               value: "standalone-redis"
             - name: "DISTANCE_CALCULATOR_URL"
               value: "http://distance-calculator:8082"
+      tolerations:
+        - key: "disk"
+          operator: "Equal"
+          value: "SSD"
+          effect: "NoSchedule"

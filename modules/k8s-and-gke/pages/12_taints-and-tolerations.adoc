@@ -1,0 +1,58 @@
+= Taints & Tolerations
+
+It is sometimes useful to make sure that _Pods_ are deployed into specific _Nodes_. Let's suppose you have two node pools :
+
+* A first node pool of 3 n1-standard-1 nodes
+* A second node pool of 3 disk-intensive nodes
+
+What you probably want to do is to deploy microservices that do basic computation on standard nodes and deploy disk-intensive services on disk-intensive nodes.
+
+In this chapter we will learn to add taints to our _Nodes_ and specify tolerations on our _Pods_ so they are able to run on the appropriate node.
+
+== Tutorial: Handling Taints & Tolerations
+
+From Google:
+
+> Node affinity, described here, is a property of pods that attracts them to a set of nodes (either as a preference or a hard requirement). Taints are the opposite – they allow a node to repel a set of pods.
+
+> Taints and tolerations work together to ensure that pods are not scheduled onto inappropriate nodes. One or more taints are applied to a node; this marks that the node should not accept any pods that do not tolerate the taints. Tolerations are applied to pods, and allow (but do not require) the pods to schedule onto nodes with matching taints.
+
+First, check your nodes:
+
+```shell
+kubectl get nodes
+```
+
+Let's say that our third node, called <THIRD_NODE> below, has specific hardware : it has faster SSD storage. Therefore _Pods_ that are configured with the same  this of type "disk=SSD"
+
+First let's add above taint to our <THIRD_NODE>:
+
+```
+kubectl taint nodes <THIRD_NODE> disk=SSD:NoSchedule
+```
+
+Now new deployed Pods won't be able to live on <THIRD_NODE> unless they have the matching toleration.
+
+Next steps:
+
+. Delete the old `travel-manager` deployment
+. Recreate it with 5 replicas
+. On each Pod, check where it has been deployed: has any of the new travel-manager Pod been deployed to <THIRD_NODE> ?
+
+Let's now add the appropriate tolerations to the `travel-manager`:
+
+```shell
+cat manifests/app/deployments/travel-manager-with-tolerations.yaml
+```
+
+Now apply it:
+
+```shell
+kubectl apply -f manifests/app/deployments/travel-manager-with-tolerations.yaml
+```
+
+Again, check each pod to see on which pod it is living, what do you notice ?
+
+== Summary
+
+In this chapter your learned how to exclude certain Pods from running on certain nodes using taints and tolerations.

@@ -55,7 +55,7 @@ kubectl rollout history deployment distance-calculator
 
 Now modify the distance-calculator deployment image to update `distance-calculator` docker image`s version:
 ```shell
-sed -i .bak 's/distance-calculator:1.0.0/distance-calculator:2.0.0/' manifests/app/deployments/distance-calculator.yaml
+sed -i 's/distance-calculator:0.0.1/distance-calculator:0.0.2/' manifests/app/deployments/distance-calculator.yaml
 ```
 Now, run following commands all together:
 ```shell

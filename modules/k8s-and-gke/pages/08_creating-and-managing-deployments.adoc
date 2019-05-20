@@ -82,11 +82,11 @@ In this exercise you will scale the `redis` deployment using an existing deploym
 === Hints
 
 ```
-vim manifests/app/deployments/redis.yaml
+vim manifests/app/deployments/travel-manager.yaml
 ```
 
 ```
-kubectl apply -f manifests/app/deployments/redis.yaml
+kubectl apply -f manifests/app/deployments/travel-manager.yaml
 ```
 
 == Exercise: Interact with the Travel Manager Service

@@ -7,7 +7,6 @@ In this chapter we will add new _Pods_ to complete our microservices architectur
 image:microservices-architecture.png[Microservices architecture]
 
 We will learn how to:
-
 * Create a service
 * Use label selectors to expose a limited set of Pods externally == Deploy our new pods
 
@@ -106,7 +105,7 @@ gcloud compute firewall-rules create travel-manager-service --allow tcp:31000
 Then use any of the `External IP` to connect to the NodePort
 
 ```shell
-curl -k https://<EXTERNAL_IP>:31000
+curl -k http://<EXTERNAL_IP>:31000/travels
 ```
 
 ===== Quiz
@@ -136,7 +135,7 @@ kubectl describe services travel-manager
 Currently the `travel-manager` service does not have any endpoints. One way to troubleshoot an issue like this is to use the `kubectl get pods` command with a label query.
 
 ```shell
-kubectl get pods -l "app=travel-manager
+kubectl get pods -l "app=travel-manager"
 ```
 
 ```shell
@@ -170,17 +169,17 @@ gcloud compute instances list
 ```
 
 ```shell
-curl -k https://<EXTERNAL_IP>:31000
+curl -k http://<EXTERNAL_IP>:31000
 ```
 
 ==== Tutorial: Remove Labels from Pods
 
 In this exercise you will observe what happens when a required label is removed from a Pod.
 
-Use the `kubectl label` command to remove the `type` label from the `travel-manager` Pod.
+Use the `kubectl label` command to remove the `version` label from the `travel-manager` Pod.
 
 ```shell
-kubectl label pods travel-manager type-
+kubectl label pods travel-manager version-
 ```
 
 View the list of endpoints on the `travel-manager` service:
@@ -207,7 +206,7 @@ kubectl delete svc travel-manager
 Observe the new service with `LoadBalancer`:
 
 ```shell
-cat manifests/app/services/travel-manager-nodeport.yaml
+cat manifests/app/services/travel-manager-lb.yaml
 ```
 
 TIP: What is the difference with the `NodePort` version ?
@@ -215,7 +214,7 @@ TIP: What is the difference with the `NodePort` version ?
 We are now ready to create our `LoadBalancer` service:
 
 ```shell
-kubectl create -f manifests/app/services/travel-manager-nodeport.yaml
+kubectl create -f manifests/app/services/travel-manager-lb.yaml
 ```
 
 Wait until a stable external IP address has been assigned to our LoadBalancer by running the following command:

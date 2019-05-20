@@ -52,7 +52,7 @@ kubectl apply -f manifests/app/deployments/travel-manager-with-limits.yaml
 Let's also update our Redis instance with some memory resources request/limit:
 
 ```shell
-kubectl apply -f manifests/app/deployments/redis-with-cpu.yaml
+kubectl apply -f manifests/app/deployments/redis-with-memory.yaml
 ```
 
 After a few seconds you should see the updated resources:

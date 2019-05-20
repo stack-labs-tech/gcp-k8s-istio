@@ -16,8 +16,8 @@ spec:
           ports:
             - name: http
               containerPort: 6379
-            resources:
-              requests:
-                memory: "200Mi"
-              limits:
-                memory: "500Mi"
+          resources:
+            requests:
+              memory: "200Mi"
+            limits:
+              memory: "200Mi"
