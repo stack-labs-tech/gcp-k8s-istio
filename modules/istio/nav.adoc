@@ -21,3 +21,6 @@
 ***     xref:04-production-path-with-istio.adoc#mirroring[Traffic mirroring]
 ***     xref:04-production-path-with-istio.adoc#canary-release[Canary release]
 ***     xref:04-production-path-with-istio.adoc#traffic-splitting[Traffic Splitting]
+
+**      xref:05-resiliency.adoc[5. Resiliency]
+***     xref:05-resiliency.adoc#prevent-fault[Prevent Fault]

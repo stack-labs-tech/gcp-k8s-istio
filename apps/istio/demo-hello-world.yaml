@@ -42,6 +42,8 @@ spec:
         - image: stacklabs/gke-and-istio-search:latest
           imagePullPolicy: Always
           env:
+            - name: SPRING_CLOUD_GCP_LOGGING_PROJECT_ID
+              value: istio-csm
             - name: SEARCH_VERSION
               value: v1
             - name: SEARCH_EVENT
@@ -128,6 +130,8 @@ spec:
         - image: stacklabs/gke-and-istio-ui:latest
           imagePullPolicy: Always
           env:
+            - name: SPRING_CLOUD_GCP_LOGGING_PROJECT_ID
+              value: istio-csm
             - name: UI_VERSION
               value: v1
             - name: UI_SEARCHURL

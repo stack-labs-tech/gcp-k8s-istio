@@ -1,0 +1,292 @@
+= Resiliency
+
+The goal of this step is to use the service mesh to improve the resiliency of our system.
+
+[#prevent-fault]
+== Prevent fault
+
+The *Search* application has a parameter which allow to define the error rate of its main endpoint. You can activate it by setting an environment variable name `SEARCH_ERROR_RATE` to a value between 0 and 100.
+
+In this step, we will deploy *UI* and *Search* configured with an error rate of 50%
+
+[source,yaml]
+----
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    istio-injection: enabled
+  name: workshop
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: workshop
+  name: search
+  labels:
+    app: search
+spec:
+  ports:
+    - name: http
+      port: 8080
+  selector:
+    app: search
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: workshop
+  labels:
+    app: search
+    version: v1
+  name: search-v1
+spec:
+  selector:
+    matchLabels:
+      app: search
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: search
+        version: v1
+    spec:
+      containers:
+        - image: stacklabs/gke-and-istio-search:latest
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_CLOUD_GCP_LOGGING_PROJECT_ID
+              value: istio-csm
+            - name: SEARCH_VERSION
+              value: v1
+            - name: SEARCH_EVENT
+              value: "GKE + Istio Formation"
+            - name: SEARCH_ERROR_RATE
+              value: "50" # <1>
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8181
+            initialDelaySeconds: 20
+          name: search
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: 1
+            limits:
+              memory: "512Mi"
+              cpu: 1
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: workshop
+  name: search
+spec:
+  hosts:
+    - search
+  http:
+    - route:
+        - destination:
+            host: search
+            subset: version-1
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  namespace: workshop
+  name: search
+spec:
+  host: search
+  subsets:
+    - name: version-1
+      labels:
+        version: v1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: workshop
+  name: ui
+  labels:
+    app: ui
+spec:
+  ports:
+    - name: http
+      port: 8080
+  selector:
+    app: ui
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: workshop
+  labels:
+    app: ui
+    version: v1
+  name: ui-v1
+spec:
+  selector:
+    matchLabels:
+      app: ui
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: ui
+        version: v1
+    spec:
+      containers:
+        - image: stacklabs/gke-and-istio-ui:latest
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_CLOUD_GCP_LOGGING_PROJECT_ID
+              value: istio-csm
+            - name: UI_VERSION
+              value: v1
+            - name: UI_SEARCHURL
+              value: http://search:8080/
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8181
+            initialDelaySeconds: 20
+          name: ui
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: 1
+            limits:
+              memory: "512Mi"
+              cpu: 1
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  namespace: workshop
+  name: ui
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: workshop
+  name: ui
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - ui
+  http:
+    - route:
+        - destination:
+            host: ui
+            subset: version-1
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  namespace: workshop
+  name: ui
+spec:
+  host: ui
+  subsets:
+    - name: version-1
+      labels:
+        version: v1
+----
+1. The error rate of the endpoint of *Search* application in this case.
+
+
+If we execute a multiple sequential calls, we will have the following results:
+
+[source,bash]
+----
+Λ\:$ while true; curl -qs 35.228.32.51; echo; end
+{"timestamp":"2019-05-20T18:45:55.193+0000","path":"/","status":500,"error":"Internal Server Error","message":"500 Internal Server Error"}
+{"timestamp":"2019-05-20T18:45:55.836+0000","path":"/","status":500,"error":"Internal Server Error","message":"500 Internal Server Error"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:45:57.511Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:45:59.037Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:45:59.735Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:46:01.344Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:46:02.402Z"}
+{"timestamp":"2019-05-20T18:46:02.787+0000","path":"/","status":500,"error":"Internal Server Error","message":"500 Internal Server Error"}
+{"timestamp":"2019-05-20T18:46:03.409+0000","path":"/","status":500,"error":"Internal Server Error","message":"500 Internal Server Error"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:46:04.916Z"}
+{"timestamp":"2019-05-20T18:46:05.105+0000","path":"/","status":500,"error":"Internal Server Error","message":"500 Internal Server Error"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:46:06.251Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:46:07.766Z"}
+----
+
+We are seeing a typical case where our first application should prevent error(s) from an underlying service. To do so with Istio, we can use a built in functionality to *Retry* (https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/#HTTPRetry[documentation]) calls on error
+
+If you apply the following YAML to override the *VirtualService* of the *Search* service, you will activate an automatic retry on every errors:
+
+[source, bash]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: workshop
+  name: search
+spec:
+  hosts:
+    - search
+  http:
+    - route:
+        - destination:
+            host: search
+            subset: version-1
+      retries:
+        attempts: 5
+        perTryTimeout: 1s
+----
+
+We can follow our long running curl process and see the number of error reduce a lot:
+
+[source, bash]
+----
+Λ\:$ while true; curl -qs 35.228.32.51; echo; end
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:37.61Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:38.495Z"}
+{"timestamp":"2019-05-20T18:51:38.795+0000","path":"/","status":500,"error":"Internal Server Error","message":"500 Internal Server Error"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:39.886Z"} <1>
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:40.451Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:41.883Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:42.914Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:43.428Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:44.234Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:45.271Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:45.884Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:46.469Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:47.607Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:48.533Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:49.437Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:51.049Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:51.815Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:53.267Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:54.36Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:54.873Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T18:51:56.75Z"}
+----
+1. The *YAML* has been applied at this time.
+
+Due to probability, this will not reduce all errors in our case, because with a *ERROR_RATE* of 50% and 5 retry, some error can still happen.
+
