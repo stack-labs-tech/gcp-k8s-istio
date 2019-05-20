@@ -45,7 +45,7 @@ class SearchHandler(prop: SearchProperties) {
 
     fun serve(serverRequest: ServerRequest): Mono<ServerResponse> {
 
-        val duration = requestWaitingRange.shuffled().first().apply { log.info("Duration will be $this ms") }
+        val duration = requestWaitingRange.shuffled().first()
         val error = errorProbability.shuffled().first() >= errorRate
 
         return if (error) {
