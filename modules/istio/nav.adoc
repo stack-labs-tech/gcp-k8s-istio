@@ -29,4 +29,5 @@
 
 **      xref:06-fault-injection.adoc[6. Fault Injection]
 ***     xref:06-fault-injection.adoc#injecting-errors[Injecting Errors]
+***     xref:06-fault-injection.adoc#delay[Delay]
 

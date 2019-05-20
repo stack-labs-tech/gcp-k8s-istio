@@ -50,3 +50,121 @@ And you can see the result by launching the curl command (or *Siege*):
 {"timestamp":"2019-05-20T21:33:05.600+0000","path":"/","status":500,"error":"Internal Server Error","message":"400 Bad Request"}
 {"timestamp":"2019-05-20T21:33:05.864+0000","path":"/","status":500,"error":"Internal Server Error","message":"400 Bad Request"}
 ----
+
+
+[#delay]
+== Delay
+
+Since the beginning, the *Search* application has a secret paremeter, `SEARCH_MAX_LATENCY` which allows us to define the max time (choose randomly inside 0-SEARCH_MAX_LATENCY) to answer to a request.
+
+You can set this value to 0 to make the *Search* service super fast ! ⚡️
+
+To do so, you have to apply the following yaml:
+
+[source, yaml]
+----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: workshop
+  labels:
+    app: search
+    version: v1
+  name: search-v1
+spec:
+  selector:
+    matchLabels:
+      app: search
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: search
+        version: v1
+    spec:
+      containers:
+        - image: stacklabs/gke-and-istio-search:latest
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_CLOUD_GCP_LOGGING_PROJECT_ID
+              value: istio-csm
+            - name: SEARCH_VERSION
+              value: v1
+            - name: SEARCH_EVENT
+              value: "GKE + Istio Formation"
+            - name: SEARCH_MAX_LATENCY
+              value: "0"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8181
+            initialDelaySeconds: 20
+          name: search
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: 1
+            limits:
+              memory: "512Mi"
+              cpu: 1
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+----
+
+And now, you can manually add latency with Istio with a simple YAML file
+
+[source, yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: workshop
+  name: search
+spec:
+  hosts:
+    - search
+  http:
+    - route:
+        - destination:
+            host: search
+            subset: version-1
+      fault:
+        delay:
+          fixedDelay: 4.000s
+          percent: 50
+----
+
+You can execute a *Siege* command before applying this *YAML* and then see the evolution of latency for those requests
+
+[source, bash]
+----
+Λ\:$ siege 35.228.32.51
+HTTP/1.1 200     0.16 secs:      99 bytes ==> GET  /
+HTTP/1.1 200     0.76 secs:      99 bytes ==> GET  /
+HTTP/1.1 200     0.86 secs:      99 bytes ==> GET  /
+HTTP/1.1 200     0.43 secs:      99 bytes ==> GET  /
+HTTP/1.1 200     0.95 secs:      99 bytes ==> GET  /
+HTTP/1.1 200     0.49 secs:      99 bytes ==> GET  /
+HTTP/1.1 200     0.89 secs:      99 bytes ==> GET  /
+HTTP/1.1 200     0.75 secs:      99 bytes ==> GET  /
+HTTP/1.1 200     0.88 secs:      99 bytes ==> GET  /
+HTTP/1.1 200     1.06 secs:      99 bytes ==> GET  /
+HTTP/1.1 200     0.95 secs:      99 bytes ==> GET  /
+HTTP/1.1 200     4.47 secs:      99 bytes ==> GET  / <1>
+HTTP/1.1 200     4.64 secs:      99 bytes ==> GET  /
+HTTP/1.1 200     4.92 secs:      99 bytes ==> GET  /
+HTTP/1.1 200     0.77 secs:      99 bytes ==> GET  /
+HTTP/1.1 200     4.46 secs:      99 bytes ==> GET  /
+HTTP/1.1 200     0.78 secs:      99 bytes ==> GET  /
+HTTP/1.1 200     0.11 secs:      99 bytes ==> GET  /
+HTTP/1.1 200     4.80 secs:      99 bytes ==> GET  /
+----
+1. First request to be delayed by Istio
+
+More:
+
+* Use stackdriver to represents the round-trip total time of a request in the mesh
+
+
