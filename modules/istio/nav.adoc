@@ -24,3 +24,4 @@
 
 **      xref:05-resiliency.adoc[5. Resiliency]
 ***     xref:05-resiliency.adoc#prevent-fault[Prevent Fault]
+***     xref:05-resiliency.adoc#traffic-limiting[Traffic Limiting]

@@ -290,3 +290,116 @@ We can follow our long running curl process and see the number of error reduce a
 
 Due to probability, this will not reduce all errors in our case, because with a *ERROR_RATE* of 50% and 5 retry, some error can still happen.
 
+[#traffic-limiting]
+== Traffic Limiting
+
+We can restrict traffic between to service, especially when we know too many request from one to another can trigger so problem on both micro-services.
+To do so, we can use the *TrafficPolicy* element define in the *DestinationRule* to prevent too many request at the same time.
+
+[source,yaml]
+----
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  namespace: workshop
+  name: search
+spec:
+  host: search
+  trafficPolicy:
+    connectionPool:
+      http:
+        http1MaxPendingRequests: 1
+        maxRequestsPerConnection: 1
+  subsets:
+    - name: version-1
+      labels:
+        version: v1
+----
+
+To see it in action, you'll have to do a lots of request because Envoy keep track of each and try to orchestrate them well to reduce the number of errors.
+
+So, with the *Docker* *Siege* command, we can see some errors occurs when a lots of request are made in parallels.
+
+[source, bash]
+----
+Λ\:~ kevin $ docker run --rm -it yokogawa/siege 35.228.32.51 -c 100 -v
+** SIEGE 3.0.5
+** Preparing 100 concurrent users for battle.
+The server is now under siege...
+HTTP/1.1 500   0.17 secs:     136 bytes ==> GET  /
+HTTP/1.1 500   0.18 secs:     136 bytes ==> GET  /
+HTTP/1.1 500   0.24 secs:     136 bytes ==> GET  /
+HTTP/1.1 200   0.25 secs:      99 bytes ==> GET  /
+HTTP/1.1 500   0.29 secs:     136 bytes ==> GET  /
+HTTP/1.1 500   0.29 secs:     136 bytes ==> GET  /
+HTTP/1.1 500   0.35 secs:     136 bytes ==> GET  /
+HTTP/1.1 200   0.50 secs:      99 bytes ==> GET  /
+HTTP/1.1 200   0.50 secs:      99 bytes ==> GET  /
+HTTP/1.1 200   1.51 secs:      99 bytes ==> GET  /
+HTTP/1.1 500   0.53 secs:     136 bytes ==> GET  /
+HTTP/1.1 200   1.56 secs:      99 bytes ==> GET  /
+HTTP/1.1 200   0.57 secs:      98 bytes ==> GET  /
+HTTP/1.1 200   0.57 secs:      99 bytes ==> GET  /
+HTTP/1.1 200   0.57 secs:      99 bytes ==> GET  /
+HTTP/1.1 500   0.62 secs:     136 bytes ==> GET  /
+HTTP/1.1 500   0.61 secs:     136 bytes ==> GET  /
+HTTP/1.1 500   0.46 secs:     136 bytes ==> GET  /
+HTTP/1.1 200   1.64 secs:      98 bytes ==> GET  /
+HTTP/1.1 200   1.65 secs:      99 bytes ==> GET  /
+HTTP/1.1 200   1.01 secs:      98 bytes ==> GET  /
+HTTP/1.1 200   1.02 secs:      99 bytes ==> GET  /
+HTTP/1.1 500   0.18 secs:     136 bytes ==> GET  /
+HTTP/1.1 200   1.04 secs:      99 bytes ==> GET  /
+HTTP/1.1 200   1.10 secs:      99 bytes ==> GET  /
+HTTP/1.1 500   0.42 secs:     136 bytes ==> GET  /
+HTTP/1.1 200   1.41 secs:      99 bytes ==> GET  /
+HTTP/1.1 200   1.43 secs:      99 bytes ==> GET  /
+HTTP/1.1 200   0.74 secs:      99 bytes ==> GET  /
+HTTP/1.1 200   1.30 secs:      99 bytes ==> GET  /
+HTTP/1.1 500   0.18 secs:     136 bytes ==> GET  /
+HTTP/1.1 500   0.46 secs:     136 bytes ==> GET  /
+HTTP/1.1 200   1.50 secs:      99 bytes ==> GET  /
+HTTP/1.1 200   1.04 secs:      99 bytes ==> GET  /
+HTTP/1.1 500   0.13 secs:     136 bytes ==> GET  /
+HTTP/1.1 200   1.57 secs:      99 bytes ==> GET  /
+HTTP/1.1 200   1.64 secs:      99 bytes ==> GET  /
+HTTP/1.1 200   1.65 secs:      99 bytes ==> GET  /
+^C
+Lifting the server siege...      done.
+
+Transactions:		         146 hits
+Availability:		       86.90 %
+Elapsed time:		        3.22 secs
+Data transferred:	        0.02 MB
+Response time:		        1.16 secs
+Transaction rate:	       45.34 trans/sec
+Throughput:		        0.01 MB/sec
+Concurrency:		       52.72
+Successful transactions:         146
+Failed transactions:	          22
+Longest transaction:	        2.03
+Shortest transaction:	        0.13
+----
+
+During this operation, you also can launch a curl inside a `while` to see the actual response:
+
+[source,bash]
+----
+Λ\:$ while true;  curl -qs 35.228.32.51; echo; end
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:05:20.255Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:05:21.666Z"}
+{"timestamp":"2019-05-20T20:05:21.844+0000","path":"/","status":500,"error":"Internal Server Error","message":"503 Service Unavailable"}
+{"timestamp":"2019-05-20T20:05:22.005+0000","path":"/","status":500,"error":"Internal Server Error","message":"503 Service Unavailable"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:05:22.732Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:05:23.393Z"}
+{"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-20T20:05:24.464Z"}
+----
+
+More:
+
+* You can follow execution logs of the envoy proxy to see what's happening during traffic exclusion
+* You can follow errors rate inside the stackdriver console to see the number of request handled by each pods
+
+
+
+
