@@ -241,9 +241,6 @@ spec:
               name: http
               protocol: TCP
 ----
-<1> Special version of this service which randomly returns errors
+<1> the version which not fails 👍
 
 You can now see errors raising down from the stackdriver graph and the logs of your application printing less errors.
-
-[#mirroring]
-== Traffic Mirroring
