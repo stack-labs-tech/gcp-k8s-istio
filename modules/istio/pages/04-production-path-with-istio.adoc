@@ -122,6 +122,10 @@ Here, we don't have any specific elements about istio. Our app should answer lik
 {"hello":"GKE + Istio Formation","from":"ui (v1) => search (v1)","date":"2019-05-19T20:18:15.855Z"}
 ----
 
+And logs from *Search* v2 application are empty
+
+//TODO Add logs from terminal | stackdriver
+
 Now, we will configure Istio to mirror all the traffic to *Search* v1 to *Search* v2, by applying this yaml:
 
 [source, yaml]
@@ -161,6 +165,10 @@ spec:
 <1> The mirror syntax to send all routed traffic to a specific subset
 <2> The definition of the specific subset by label
 
+We can now see logs inside our terminal with the following command:
+
+//TODO add terminal logs for this case
+
 We need to analyse the system, so we can define a graph in stackdriver monitoring to see this:
 
 image:04-production-path-with-istio/01_stackdriver-error-on-app-by-version.png[Analysing the mirroring traffic app]
@@ -176,4 +184,64 @@ To generate the same graph, you have to define:
 ** user_labels.app
 ** user_labels.version
 * Aggregator: *sum*
+
+In order to fix the issue, we will deploy a working version of the v2 application. You need to apply this YAML file.
+
+[source, yaml]
+----
+apiVersion: v1
+kind: Service
+metadata:
+  name: search-v2
+  labels:
+    app: search
+    version: v2
+spec:
+  ports:
+    - name: http
+      port: 8080
+  selector:
+    app: search
+    version: v2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: search
+    version: v2
+  name: search-v2
+spec:
+  selector:
+    matchLabels:
+      app: search
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: search
+        version: v2
+    spec:
+      containers:
+        - image: stacklabs/gke-and-istio-search:v2 # <1>
+          imagePullPolicy: Always
+          env:
+            - name: SEARCH_VERSION
+              value: v2
+            - name: SEARCH_EVENT
+              value: "GKE + Istio Formation"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8181
+            initialDelaySeconds: 20
+          name: search
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+----
+<1> Special version of this service which randomly returns errors
+
+You can now see errors raising down from the stackdriver graph and the logs of your application printing less errors.
 
