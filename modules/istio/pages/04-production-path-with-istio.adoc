@@ -326,3 +326,9 @@ This is possible only because the *UI* application forwards all incoming headers
 
 TIP: This is possible thanks to Spring Cloud Sleuth in our context, or this can be manually in our app
 
+*More*:
+* Create a dashboard in stackdriver monitoring to follow the traffic coming into this version of the application
+* Follow logs execution of both application in parallels in Stackdriver logging
+* Follow the distributed traces inside Stackdriver trace
+
+
