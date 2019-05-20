@@ -22,5 +22,5 @@
 *** xref:10_resources-limiting.adoc#resource-limiting[Resource Limiting]
 *** xref:10_resources-limiting.adoc#qos[QoS]
 ** xref:11_autoscaling.adoc[11. Autoscaling]
-** xref:11_taints-and-tolerations.adoc[12. Taints & Tolerations]
+** xref:12_taints-and-tolerations.adoc[12. Taints & Tolerations]
 ** xref:15_cleanup.adoc[15. Cleanup]

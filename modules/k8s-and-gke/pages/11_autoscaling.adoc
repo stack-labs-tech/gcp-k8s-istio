@@ -10,6 +10,10 @@ In this tutorial we will deploy a CPU intensive apache container and configure a
 
 First, we will start a deployment running the image and expose it as a service:
 
+```shell
+kubectl run php-apache --image=k8s.gcr.io/hpa-example --requests=cpu=200m --expose --port=80
+```
+
 Now that our apache server is running, we can create the Horizontal Pod Autoscaler:
 
 ```shell
