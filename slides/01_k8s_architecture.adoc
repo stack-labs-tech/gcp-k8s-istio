@@ -1,7 +1,7 @@
 
 === Kubernetes architecture
 
-image::images/k8s-architecture.png[]
+image::images/k8s/k8s-architecture.png[]
 
 === Kubernetes architecture: the nodes
 
@@ -103,4 +103,4 @@ spec:
 
 === A typical pattern
 
-image::images/k8s-pods-and-nodes.png[]
+image::images/k8s/k8s-pods-and-nodes.png[]

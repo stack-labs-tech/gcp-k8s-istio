@@ -6,7 +6,7 @@
 
 === Auto-Scaling
 
-image::images/horizontal-pod-autoscaler.svg[]
+image::images/k8s/horizontal-pod-autoscaler.svg[]
 
 === Auto-Scaling
 

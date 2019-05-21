@@ -4,7 +4,7 @@
 [%notitle]
 === We need to scale !
 
-image::images/k8s-need-for-scale.png[background, size=contain]
+image::images/k8s/k8s-need-for-scale.png[background, size=contain]
 
 === We need to scale !
 

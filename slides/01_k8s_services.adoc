@@ -10,7 +10,7 @@
 [%notitle]
 === K8S service access implementation
 
-image::images/k8s-service-access.png[background, size=contain]
+image::images/k8s/k8s-service-access.png[background, size=contain]
 
 === Practice time !
 
@@ -23,7 +23,7 @@ Add services to access your microservices
 
 === GKE auto-magic
 
-image::images/gcp-loadbalancer.png[size=contain]
+image::images/k8s/gcp-loadbalancer.png[size=contain]
 
 === Services levels
 

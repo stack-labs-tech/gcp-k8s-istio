@@ -9,7 +9,7 @@
 * Assigned to cluster nodes by the Kubernetes Scheduler.
 
 === Workshop microservices architecture
-image::images/microservices-architecture.png[]
+image::images/k8s/microservices-architecture.png[]
 
 === Practice time !
 

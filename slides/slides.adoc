@@ -26,3 +26,10 @@ include::01_k8s_deployments.adoc[]
 // 01 - Scaling
 // Experimenting scaling & autoscaling
 include::01_k8s_scaling.adoc[]
+
+// 03 - Cloud IAM
+// Slides and demo on Cloud IAM
+include::03_cloud_iam.adoc[]
+
+// 04 - GCP from withing GKE
+include::04_gcp_from_within_gke.adoc[]
