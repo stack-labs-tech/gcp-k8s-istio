@@ -40,7 +40,7 @@ First, we will deploy the *v2* version of the *Search* service. To do so, you ha
 apiVersion: v1
 kind: Service
 metadata:
-  name: search-v2
+  name: search
   labels:
     app: search
     version: v2
