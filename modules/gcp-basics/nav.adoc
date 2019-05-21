@@ -7,5 +7,6 @@
 **** xref:01_google_compute_engine#basics-from-cli[From gcloud cli]
 *** xref:01_google_compute_engine.adoc#managed-instances-groups[Managed Instances Groups]
 *** xref:01_google_compute_engine.adoc#others[To go further]
+** xref:02_virtual_private_cloud.adoc[2. Virtual Private Cloud]
 
 

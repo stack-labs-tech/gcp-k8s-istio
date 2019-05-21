@@ -1,0 +1,98 @@
+
+= Virtual Private Cloud (VPC)
+
+In this chapter you will create and manipulate various types of VPC :
+
+* default network
+* auto-mode network
+* custom network
+
+The objective of this chapter is to deploy these various VMs onto different network topologies:
+
+
+|===
+|Name |Network |Region |Zone
+
+|instance-default
+|default
+|europe-west1
+|europe-west1-b
+
+|instance-auto
+|my-auto-network
+|europe-west1
+|europe-west1-b
+
+|instance-custom-1
+|my-custom-network
+|europe-north1
+|europe-north1-a
+
+|instance-custom-2
+|my-custom-network
+|europe-north1
+|europe-north1-b
+
+|instance-custom-3
+|my-custom-network
+|europe-west1
+|europe-west1-b
+
+|===
+
+== Creating networks
+
+=== Default network
+
+Nothing to do, it is already created...
+
+=== Auto-mode network
+
+. Create an auto-mode network named `my-auto-network`.
+. Choose "Automatic" for "Subnet creation mode"
+. Select all listed firewall rules
+. Do create the network
+
+=== Custom network
+
+. Create a custom network named `my-custom-network`
+. Create three subnetworks as follows:
+** subnet-1a: 192.168.5.0/24 in europe-north1-a
+** subnet-1b: 192.168.3.0/24, in europe-north1-b
+** subnet-2: 192.168.7.0/24 in a europe-west1-b
+. Create firewall rules for this network: add a rule named `allow-ssh-icmp-rdp-custom` with following params:
+** network: my-custom-network
+** target-tags: allow-defaults
+** source IP ranges: 0.0.0.0/0
+** Ports 22 & 3389
+** Protocol icmp
+
+== Testing
+
+You should be able to ping:
+
+* ✅ instance-default -> instance-default : with DNS resolution
+* ❌ instance-default -> instance-auto : no DNS resolution outside network
+* ❌ instance-default -> instance-auto **Internal IP** : not the same network
+* ✅ instance-default -> instance-auto **External IP** : default firewall rules kick in
+* ✅ instance-default -> instance-custom-1 **External IP** : should work after configuring appropriate firewall rules
+
+Try opening an SSH connection to `instance-custom-2`, what happens ?
+What do you need to add to enable SSH connection to this instance ?
+
+After modifying this, you should now be able to ping:
+
+* ✅ instance-custom-2 -> instance-custom-3
+* ✅ instance-custom-2 -> instance-custom-3 **Internal IP**
+
+=== Hints
+
+You can either:
+* Add `allow-defaults` as a tag of your instances
+* Remove `allow-defaults` target tags from the firewall rules
+
+Try both !
+
+== Summary
+
+In this chapter, you learned to create different types of network modes with associated routes and firewall rules.
