@@ -195,17 +195,15 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: workshop
-  name: search-v2
+  name: search
   labels:
     app: search
-    version: v2
 spec:
   ports:
     - name: http
       port: 8080
   selector:
     app: search
-    version: v2
 ---
 apiVersion: apps/v1
 kind: Deployment
