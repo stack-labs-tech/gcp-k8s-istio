@@ -1,0 +1,12 @@
+* **GCP basics** 🖥
+
+** xref:00_setup.adoc[Prerequisites]
+** xref:01_google_compute_engine.adoc[1. Google Compute Engine]
+*** xref:01_google_compute_engine#basics[First Compute Instances]
+**** xref:01_google_compute_engine#basics-from-console[From GCP Console]
+**** xref:01_google_compute_engine#basics-from-cli[From gcloud cli]
+*** xref:01_google_compute_engine.adoc#managed-instances-groups[Managed Instances Groups]
+
+
+
+

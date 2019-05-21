@@ -1,0 +1,97 @@
+
+[#managed-instances-groups]
+== Go further with __Managed Instance Groups__
+
+=== Creating a __Managed Instance Group__
+
+Compute instances can be further managed using managed instance groups.
+To test this we will use `gcloud` command to create a managed instance group of VMs that will
+all run the same Apache server as earlier but will return a different message each.
+
+We will start by creating an instance template based on the same command as we used to create a single
+ VM, except here we will create a template from this:
+
+Check the content of the startup script for the managed instance group:
+
+```shell
+cat startup-script-for-managed-instance-group.sh
+```
+
+```shell
+gcloud compute --project=${GCP_PROJECT} instance-templates create apache-server-template \
+    --machine-type=f1-micro \
+    --network=projects/${GCP_PROJECT}/global/networks/default \
+    --metadata-from-file startup-script=startup-script-for-managed-instance-group.sh \
+    --tags=http-server \
+    --image=debian-9-stretch-v20190326 \
+    --image-project=debian-cloud \
+    --boot-disk-size=10GB \
+    --boot-disk-type=pd-standard \
+    --boot-disk-device-name=apache-server-template
+```
+
+Now that our instance template is ready we can create an instance group that uses this instance template.
+
+But first we need to create a HTTP healthcheck for autoscaling purposes:
+
+```shell
+gcloud compute --project "${GCP_PROJECT}" health-checks create tcp "http-health" \
+    --timeout "5" \
+    --check-interval "10" \
+    --unhealthy-threshold "3" \
+    --healthy-threshold "2" \
+    --port "80"
+```
+
+We can now create our instance group that will rely on the healthcheck previously created:
+
+```shell
+gcloud beta compute --project=${GCP_PROJECT} instance-groups managed create apache-instance-group \
+    --base-instance-name=apache-instance-group \
+    --template=apache-server-template \
+    --size=1 \
+    --zone=europe-west1-b \
+    --health-check=http-health \
+    --initial-delay=300
+```
+
+Finally we will add an autoscaling method on our new instance group:
+
+```shell
+gcloud compute --project "${GCP_PROJECT}" instance-groups managed set-autoscaling "apache-instance-group" \
+    --zone "europe-west1-b" \
+    --cool-down-period "60" \
+    --max-num-replicas "5" \
+    --min-num-replicas "3" \
+    --target-cpu-utilization "0.6"
+```
+
+At this point an instance group should have been created with a minimum of 3 instances and a maximum of 5.
+
+We can verify that all our instances have been created:
+
+image::compute-engine/apache-server-instances-from-group.png[]
+
+=== Adding a __HTTP Load Balancer__ to access our __Managed Instance Group__
+
+It is now time to add an HTTP load-balancer behind our instance group !
+
+Open the console and navigate to Network Services > Load Balancing, then select "Create HTTP(S) Load Balancer".
+
+Click on __Backend Configuration__ and fill as follow:
+
+image::compute-engine/lb-backend-config.png[]
+
+Then click on __Frontend configuration__ and under IP address, click __Reserve static address__:
+
+image::compute-engine/lb-reserve-static-ip.png[]
+
+Finalize the frontend configuration and click on "Done":
+
+image::compute-engine/lb-frontend-configuration.png[]
+
+Finally name your LoadBalancer configuration, rewiew and finalize creation.
+
+The load balancer setup can take up to a few minutes.
+
+

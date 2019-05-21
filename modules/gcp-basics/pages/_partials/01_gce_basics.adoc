@@ -1,0 +1,77 @@
+
+[#basics]
+== Creating basic __Compute Instances__
+
+[#basics-from-console]
+=== From Google Cloud Console
+
+In Google Cloud Console burger menu, select Compute Engine > VM instances.
+
+Then click on "➕ Create Instance" and fill as followed:
+
+image::compute-engine/apache-server-instance.png[]
+
+Leave remaining fields untouched.
+
+Once the image is created you should see something like this:
+
+image::compute-engine/apache-server-created.png[]
+
+You will note that we have both an internal and external IP. More on this later.
+
+We will now install apache webserver on this compute instance to test connectivity.
+First connect to the compute instance by clicking the `SSH` button next to your VM name:
+
+image::compute-engine/apache-server-ssh.jpg[]
+
+Now do install `apache2`:
+
+```shell
+sudo apt-get update
+sudo apt-get install apache2
+```
+
+We can now access our simple Apache server through VM external IP.
+You can open a browser to this IP by clicking the following link:
+
+image::compute-engine/apache-server-external-ip.png[]
+
+[#basics-from-cli]
+=== From command line and startup script
+
+Creating a VM from Google Cloud Console is pretty easy and works well for many cases,
+however in a professional context you most likely want to automate the creation of your VM and make it easily reproducible.
+
+In this part we will use gcloud command line to create a new compute instance. We will pass it a local __startup script__ that will proceed with the actual apache server installation.
+
+Check the content of the startup script:
+
+```shell
+cat startup-script.sh
+```
+
+You can now create the second apache server instance. We will create exactly the same instance as in the first part except that this one will be created from a startup script (and from the command line). Use this command:
+
+```shell
+gcloud compute --project=${GCP_PROJECT} instances create apache-server-2 \
+  --zone=europe-west1-b \
+  --machine-type=f1-micro \
+  --subnet=default \
+  --metadata-from-file startup-script=startup-script.sh \
+  --tags=http-server \
+  --image=debian-9-stretch-v20190326 \
+  --image-project=debian-cloud \
+  --boot-disk-size=10GB \
+  --boot-disk-type=pd-standard \
+  --boot-disk-device-name=apache-server-2
+```
+
+After a few seconds you should see a successful result like this one:
+
+image::compute-engine/apache-server-2-success.png[]
+
+You can now open your browser and access the external IP of your newly created VM. You should see this page:
+
+image::compute-engine/apache-server-2-result.png[]
+
+NOTE: To go one step further in the automation process we could store the startup script (e.g. as part of a CI step) and we can create a compute instance https://cloud.google.com/compute/docs/startupscript#cloud-storage[using this storage startup script].

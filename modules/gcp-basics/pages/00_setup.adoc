@@ -1,0 +1,24 @@
+
+= GCP Basics
+
+This workshop and associated lessons will navigate through some important GCP products such as _Cloud IAM_ or _Compute Engine_.
+
+== Prerequisites
+
+Connect to http://console.cloud.google.com[Google Cloud] and select (or create) a project in which you can create compute instances.
+
+Export your project name to a variable:
+
+```shell
+GCP_PROJECT=$(gcloud config list --format 'value(core.project)')
+```
+
+Verify your current project:
+```shell
+echo $GCP_PROJECT
+```
+
+If you need to switch GCP project, simply use this command beforehand:
+```shell
+gcloud config set project [YOUR_PROJECT_ID]
+```

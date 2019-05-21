@@ -1,0 +1,9 @@
+
+= Getting started with Google Compute Engine
+
+In this chapter we will learn how to use Google Compute Engine to create, deploy, manage and automate compute instances (VMs) on GCP platform. We will in particular learn how to deploy different compute instances and use compute instance groups to automate our pool handling.
+
+NOTE: In this tutorial the terms __VM__ and __compute instance__ will be used to refer to the same thing, i.e. a __Google Cloud Compute instance.__
+
+include::{partialsdir}/01_gce_basics.adoc[]
+include::{partialsdir}/01_gce_managed_instance_group.adoc[]
