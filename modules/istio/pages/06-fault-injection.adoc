@@ -55,7 +55,7 @@ And you can see the result by launching the curl command (or *Siege*):
 [#delay]
 == Delay
 
-Since the beginning, the *Search* application has a secret paremeter, `SEARCH_MAX_LATENCY` which allows us to define the max time (choose randomly inside 0-SEARCH_MAX_LATENCY) to answer to a request.
+Since the beginning, the *Search* application has a secret parameter, `SEARCH_MAX_LATENCY` which allows us to define the max time (choose randomly inside 0-SEARCH_MAX_LATENCY) to answer to a request.
 
 You can set this value to 0 to make the *Search* service super fast ! ⚡️
 
