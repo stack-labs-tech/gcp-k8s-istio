@@ -8,5 +8,3 @@
 *** xref:01_google_compute_engine.adoc#managed-instances-groups[Managed Instances Groups]
 
 
-
-

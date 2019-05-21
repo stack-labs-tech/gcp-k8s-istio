@@ -1,0 +1,15 @@
+
+= Accessing external services from GKE
+
+In this workshop we will learn how to access external services from our GKE cluster. We will in particular see how to access other GCP resources such as managed services or compute instances.
+
+== Prerequisites
+
+In order to achieve this workshop you should have at least a minimal knowledge of the following things:
+
+* GCP basics, in particular the GCP console and the VPC networks
+* Kubernetes: you should be confortable with deploying a cluster and interacting it with
+* Istio: you should understand the basic concepts and understand how it integrates with a k8s cluster
+
+In this workshop we will learn how to access GCP resources such as managed services or compute instances from our GKE cluster.
+

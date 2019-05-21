@@ -1,0 +1,172 @@
+
+= Connecting Kubernetes __Pod__ to GCP-managed Redis
+
+In this chapter we will learn how to access a GCP "MemoryStore" (i.e. a managed Redis) from within our GKE cluster. We will use what we have learnt so far to:
+
+* Deploy a Kubernetes cluster with Istio enabled
+* Deploy our microservices stack to Kubernetes
+
+Once everything is deployed as we did in the first two days, we will additionally create a Redis managed instance and configure our `travel-manager` service to connect to this instance instead of an embedded standalone instance.
+
+[#create-redis]
+== Creating a GCP-managed Redis
+
+Connect to GCP console and open the left menu to go to `MemoryStore`. Then click on "Create Instance" and fill information as follows:
+
+image::create-redis-instance.png[]
+
+TIP: Remember the region you choose here and note your Redis instance IP address.
+
+[#create-gke-cluster]
+== Creating a GKE cluster with Istio
+
+At this step we will create a GKE cluster with Istio enabled, just as we did during Istio workshop.
+
+NOTE: The Kubernetes cluster **must** be in the same region as the MemoryStore instance.
+
+=== From the UI
+
+You can create the cluster from UI, following those steps:
+
+1. Open cluster pages on Google Cloud Console
++
+image:01_go-to-gke-cluster-page.png[Open cluster pages on Google Cloud Console]
+
+2. Click on create cluster
++
+image:02_click-on-create-cluster.png[Click on create cluster]
+
+3. Name the cluster, choose version of GKE and select 2vCPU / 7,5Gb of ram machine type
++
+image:03_fill-form-01.png[fill form cluster creation 01]
+
+4. In advanced settigs, choose to use VPC Native and follow the parameters in the capture
++
+image:04_fill-form-02.png[fill form cluster creation 02]
+
+5. Finally, enable the Istio module with permissive mode like in the capture
++
+image:06_fill-form-04.png[fill form cluster creation 04]
+
+
+[#cluster-creation-from-cli]
+=== From the CLI
+
+You can create the cluster with the following comamnd:
+
+Important: Don't forget to set your default project before running this command
+
+```shell
+gcloud beta container clusters create "kube-cluster"
+    --zone "europe-west1-b"
+    --no-enable-basic-auth
+    --cluster-version "1.13.5-gke.10"
+    --machine-type "n1-standard-2"
+    --image-type "COS"
+    --disk-type "pd-standard"
+    --disk-size "100"
+    --metadata disable-legacy-endpoints=true
+    --scopes "https://www.googleapis.com/auth/devstorage.read_only","https://www.googleapis.com/auth/logging.write","https://www.googleapis.com/auth/monitoring","https://www.googleapis.com/auth/servicecontrol","https://www.googleapis.com/auth/service.management.readonly","https://www.googleapis.com/auth/trace.append"
+    --num-nodes "3"
+    --enable-cloud-logging
+    --enable-cloud-monitoring
+    --enable-ip-alias
+    --network "projects/training-gcp-advanced/global/networks/default"
+    --subnetwork "projects/training-gcp-advanced/regions/europe-west1/subnetworks/default"
+    --default-max-pods-per-node "110"
+    --addons HorizontalPodAutoscaling,HttpLoadBalancing
+    --enable-autoupgrade
+    --enable-autorepair
+```
+
+=== Connecting to the cluster
+
+The cluster creation will take few minutes. Then, after the creation is complete, you have to `connect` to it.
+To do so, you have to click on the `connect` button in the Google Cloud Console, in the list of clusters.
+
+image:07-connect-to-cluster-01.png[choose cluster to connect to]
+
+Then, you can copy/paste the command line to your CLI or execute it directly inside the Google Cloud Shell.
+
+image:08-connect-to-cluster-02.png[execute the command displayed in the UI]
+
+[#deploy-apps]
+== Deploying Applications
+
+Because the goal of this workshop is not to discover Kubernetes or Istio, we will deploy a full-featured configuration containing the following things:
+
+* Deployment and Service for `distance-calculator`
+* Deployment and Service for `travel-manager`
+* Ingress Gateway so cluster entrypoint points to `travel-manager` pod
+
+You can first have a look at the deploy plan:
+
+```shell
+cat manifests/istio-plan.yaml
+```
+
+Note that the connection string to Redis is currently not set. You first need to edit the file and replace this variable. Look for `REDIS_HOST` environment variable:
+
+```shell
+vim manifests/redis-service-entry.yaml
+```
+
+Once you replaced Redis connection string you can apply this complete plan:
+
+```shell
+kubectl apply -f manifests/istio-plan.yaml
+```
+
+At this point you should have deployed both microservices: check `travel-manager` logs, what can you see ?
+
+[#enable-external-access]
+== Enabling access to external services
+
+By default, Istio blocks all outbound requests from inside the cluster. To allow outbound requests, we need to create a `ServiceEntry` for our Redis instance IP address.
+
+Here is the `ServiceEntry` we are going to deploy:
+
+```shell
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: managed-redis
+  namespace: workshop
+spec:
+  hosts:
+    - <REPLACE_WITH_YOUR_INSTANCE_IP>
+  ports:
+    - number: 6379
+      name: redis
+      protocol: TCP
+  resolution: NONE
+  location: MESH_EXTERNAL
+```
+
+A few things to note:
+
+. The ServiceEntry specify a list of external hosts to allow outbound connections for
+. Port number and protocol match Redis port/protocol
+. Resolution is set to None as our external host is already a resolved IP address. If connecting to a named API (e.g. `storage.googleapis.com`) we need to set the resolution field to `DNS`
+. Location is set to `MESH_EXTERNAL` as the service we are targeting is not part of the mesh.
+
+In `manifests/redis-service-entry.yaml` don't forget to replace the destination host with your Redis instance IP address.
+
+You can now apply the service-entry:
+
+```shell
+kubectl apply -f manifests/redis-service-entry.yaml
+```
+
+You can now check again the `travel-manager` logs: what do you see now ?
+
+Finally, you can access the app using cluster external IP address:
+
+```
+kubectl get services -n istio-system
+curl <CLUSTER_EXTERNAL_IP>/travels
+```
+
+== Summary
+
+In this chapter you learned how to create a Redis instance on GCP platform and connect to this instance from a GKE pod running between an Istio/Envoy proxy.

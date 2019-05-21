@@ -1,0 +1,14 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: managed-redis
+  namespace: workshop
+spec:
+  hosts:
+    - <REPLACE_WITH_YOUR_INSTANCE_IP>
+  ports:
+    - number: 6379
+      name: redis
+      protocol: TCP
+  resolution: NONE
+  location: MESH_EXTERNAL

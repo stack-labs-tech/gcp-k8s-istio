@@ -1,0 +1,107 @@
+
+= Connecting Kubernetes __Pod__ to Compute Instance group
+
+In this chapter we will learn how to access a Compute Instance group.
+
+NOTE: To run this chapter you need to have an existing compute instance group already deployed. If you don't have one, please check the appropriate section
+
+[#delete-ext-lb]
+== Deleting the external HTTP(s) LoadBalancer
+
+Our Nginx instances group was previously publicly available behind an external HTTP(s) LoadBalancer. However we now want to remove our VM compute instances public access and replace with only an internal access.
+
+We can now remove old external HTTP(s) LoadBalancer:
+
+. Under Network Services > Load Balancing, remove `apache-backend` : you need to remove both backend and frontend
+. Under VPC networks > External IP addresses, remove the static IP we reserved earlier
+
+[#create-int-lb]
+== Creating the internal TCP/UDP LoadBalancer
+
+What we want to do is to access our compute instance service (here a Nginx server) from our `travel-manager` Pod in Kubernetes.
+
+NOTE: Keep in mind that this nginx server is just an example to demonstrate GKE to GCP communication to keep it simple, a real use-case would rather connect to a compute instance group of MongoDB, Kafka or another backend rather than a frontend nginx server...
+
+As we want to be able to access any of the nginx server, we will now create an internal UDP/TCP load-balancer so our `travel-manager` pod can point to a load-balancer instead of directly pointing to individual VM instances.
+
+. Go to Network services >  Load Balancing
+. Click on "Create Load Balancer"
+. Under "TCP Load Balancing", click "Start Configuration"
+. Select "Only between my VMs" to keep our load-balancer internal to our VPC and do not expose it to the internet.
+. Click continue
+. Give it a name
+. Under Backend Configuration, select the same region and network as your k8s cluster (probably europe-west1 and default)
+. Select your `apache-server` instance group and the health check you added previously
+. Under Frontend Configuration, give it a name and select the default network
+. Under Internal IP you can optionally reserve a static internal IP address, however this is not necessary for the next steps as we will use the DNS resolution
+. Under Port number type "80"
+. Under service label type "nginx-frontend"
+. Finally, review your configuration and create the internal LB.
+
+Wait a few seconds or minutes until the internal LB is created, then click on your new lb and note the value under "DNS name".
+
+You should see a value such as :
+
+```shell
+nginx-frontend.nginx-group-frontend.il4.europe-west1.lb.<YOUR_PROJECT_ID>.internal
+```
+
+[#redeploy-travel-manager]
+== Redeploying `travel-manager`
+
+To test the connection we will be using a new endpoint on our `travel-manager`: `/nginx`. This endpoint will simply output the HTML sent by one of the nginx instance as a string.
+
+We will simply a new environment variable called `NGINX_HOST` with the DNS name of our new internal LB:
+
+```
+env:
+- name: "NGINX_HOST"
+  value: "<REPLACE_WITH_YOUR_LB_INTERNAL_IP>"
+```
+
+Replace this variable in the file `travel-manager-with-nginx-url.yaml` and then replace this deployment:
+
+```shell
+kubectl apply -f manifests/travel-manager-with-nginx-url.yaml
+```
+
+[#enable-external-access]
+== Enabling access to external services
+
+Similarly to previous chapter we will now deploy a `ServiceEntry` Istio resource to authorize outbound requests to our load balancer:
+
+```shell
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: nginx-instance-group
+  namespace: workshop
+spec:
+  hosts:
+    - <REPLACE_WITH_YOUR_INTERNAL_LB_IP>
+  ports:
+    - number: 80
+      name: nginx
+      protocol: TCP
+  resolution: DNS
+  location: MESH_EXTERNAL
+```
+
+This time we are targeting port 80 and specifying that we want a `DNS` resolution.
+
+You can now apply the service-entry:
+
+```shell
+kubectl apply -f manifests/nginx-service-entry.yaml
+```
+
+Finally, you can access the app using cluster external IP address:
+
+```
+kubectl get services -n istio-system
+curl <CLUSTER_EXTERNAL_IP>/nginx
+```
+
+== Summary
+
+In this chapter you learned how to connect to a managed instance group from a GKE pod running between an Istio/Envoy proxy using an Internal LoadBalancer and a `ServiceEntry`.

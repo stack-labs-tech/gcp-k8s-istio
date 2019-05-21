@@ -6,5 +6,5 @@ nav:
 - modules/gcp-basics/nav.adoc
 - modules/k8s-and-gke/nav.adoc
 - modules/istio/nav.adoc
-- modules/connecting-to-managed-services/nav.adoc
+- modules/gcp-from-within-gke/nav.adoc
 start_page: ROOT:introduction.adoc

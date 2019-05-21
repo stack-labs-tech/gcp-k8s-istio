@@ -1,0 +1,14 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: nginx-instance-group
+  namespace: workshop
+spec:
+  hosts:
+    - <REPLACE_WITH_YOUR_INTERNAL_LB_IP>
+  ports:
+    - number: 80
+      name: nginx
+      protocol: TCP
+  resolution: DNS
+  location: MESH_EXTERNAL

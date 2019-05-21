@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: workshop
+  labels:
+    app: travel-manager
+    version: v1
+  name: travel-manager-v1
+spec:
+  selector:
+    matchLabels:
+      app: travel-manager
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: travel-manager
+        version: v1
+    spec:
+      containers:
+        - name: travel-manager
+          image: stacklabs/travel-manager:0.0.3
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8081
+          resources:
+            requests:
+              cpu: 256m
+              memory: "256Mi"
+            limits:
+              cpu: 256m
+              memory: "256Mi"
+          env:
+            - name: "NGINX_HOST"
+              value: "<REPLACE_WITH_YOUR_LB_INTERNAL_IP>"
+            - name: "REDIS_HOST"
+              value: "<REPLACE_WITH_YOUR_INSTANCE_IP>"
+            - name: "DISTANCE_CALCULATOR_URL"
+              value: "http://distance-calculator:8082"

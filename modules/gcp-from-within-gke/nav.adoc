@@ -1,5 +1,9 @@
 * **GCP from withing GKE**
 
-
-
-
+** xref:00_prerequisites.adoc[Prerequisites]
+** xref:01_gke_to_memorystore.adoc[1. Connecting to a managed Redis]
+*** xref:01_gke_to_memorystore.adoc#create-redis[Create managed Redis]
+*** xref:01_gke_to_memorystore.adoc#create-gke-cluster[Create GKE cluster with Istio]
+*** xref:01_gke_to_memorystore.adoc#deplo-apps[Deploy applications]
+*** xref:01_gke_to_memorystore.adoc#enable-external-access[Enable external access]
+*** xref:02_gke_to_compute_instance.adoc[2. Connecting to a VM group instance]
