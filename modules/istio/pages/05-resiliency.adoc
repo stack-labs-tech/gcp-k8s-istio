@@ -293,7 +293,7 @@ Due to probability, this will not reduce all errors in our case, because with a 
 [#traffic-limiting]
 == Traffic Limiting
 
-We can restrict traffic between to service, especially when we know too many request from one to another can trigger so problem on both micro-services.
+We can restrict traffic between two service, especially when we know too many request from one to another can trigger so problem on both micro-services.
 To do so, we can use the *TrafficPolicy* element define in the *DestinationRule* to prevent too many request at the same time.
 
 [source,yaml]
