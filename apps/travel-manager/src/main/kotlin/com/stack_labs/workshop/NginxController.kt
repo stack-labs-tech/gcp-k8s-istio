@@ -4,9 +4,9 @@ import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
 import io.reactivex.Single
 
-@Controller("/version")
-class VersionController() {
+@Controller("/nginx")
+class NginxController(private val nginxClient: NginxClient) {
 
     @Get("/")
-    fun who(): String = "0.0.3"
+    fun home(): Single<String> = nginxClient.home()
 }

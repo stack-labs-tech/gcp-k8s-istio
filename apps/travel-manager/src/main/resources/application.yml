@@ -9,5 +9,9 @@ distance-calculator:
     url: ${DISTANCE_CALCULATOR_URL:http://localhost:8082}
 
 ---
+nginx:
+    url: http://${NGINX_HOST}
+
+---
 redis:
     uri: redis://${REDIS_HOST:localhost}:${REDIS_PORT:6379}
