@@ -26,6 +26,8 @@ destinationrule.networking.istio.io/ui created
 
 WARNING: Use the *workshop* namespace for all following operation.
 
+NOTE: to have distributed trace & logs, you have to download the https://gitlab.com/snippets/1858919/raw[demo-file] and modify the `SPRING_CLOUD_GCP_LOGGING_PROJECT_ID` to your own project id.
+
 [#mirroring]
 == Traffic Mirroring
 
