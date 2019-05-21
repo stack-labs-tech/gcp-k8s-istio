@@ -50,7 +50,6 @@ spec:
       port: 8080
   selector:
     app: search
-    version: v2
 ---
 apiVersion: apps/v1
 kind: Deployment
