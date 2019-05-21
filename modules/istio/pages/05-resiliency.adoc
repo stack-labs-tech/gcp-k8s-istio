@@ -466,7 +466,7 @@ Use stern to follow logs of both pods at same time:
 
 [source,bash]
 ----
-Λ\:~ kevin $ kt search -t -c search
+Λ\:~ kevin $ stern search -t -c search
 search-v1-65b684bd54-bbt4d search 2019-05-20T20:20:48.025575791Z {"traceId":"b32b5b724cf05561","spanId":"4b49b5f6ab7cd9c4","spanExportable":"false","X-B3-ParentSpanId":"e682d580f4bebe9f","parentId":"e682d580f4bebe9f","timestampSeconds":1558383648,"timestampNan
 os":25000000,"severity":"INFO","thread":"parallel-1","logger":"com.stack_labs.workshop.gkeandistio.search.SearchHandler","message":"Search service called and respond with event \"GKE + Istio Formation:v1\" ","context":"default","logging.googleapis.com/trace":"
 projects/istio-csm/traces/0000000000000000b32b5b724cf05561","logging.googleapis.com/spanId":"4b49b5f6ab7cd9c4"}
