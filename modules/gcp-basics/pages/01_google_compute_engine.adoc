@@ -7,3 +7,4 @@ NOTE: In this tutorial the terms __VM__ and __compute instance__ will be used to
 
 include::{partialsdir}/01_gce_basics.adoc[]
 include::{partialsdir}/01_gce_managed_instance_group.adoc[]
+include::{partialsdir}/01_gce_other_exercices.adoc[]

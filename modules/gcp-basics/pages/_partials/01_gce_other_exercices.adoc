@@ -1,0 +1,38 @@
+
+[#others]
+== To go further...
+
+Below are some exercises ideas if you want to go deeper around compute instances and automation:
+
+=== Create your own VM image from GCS
+
+* https://cloud.google.com/compute/docs/images/export-image[Creating and exporting an image to GCS]
+* https://cloud.google.com/compute/docs/images/import-existing-image[Importing and Creating an image from GCS]
+
+=== Create your own VM image from a boot disk
+
+TIP: This only allows creating VM images in the same zone
+
+* Create a VM
+* Make customizations, change settings, install software in this VM (e.g. apache-server)
+* Terminate VM, keep boot disk
+* Unattach disk
+* Create a new VM from the boot disk, in the same zone
+
+=== Create your own VM image from a snapshot
+
+TIP: Allows for multi-regional VM image creation
+
+* Create a VM
+* Make customizations, change settings, install software in this VM (e.g. apache-server)
+* Terminate VM, keep boot disk
+* Create a snapshot of the disk
+* Create a new VM from the snapshot, in another region
+
+=== Move an instance from one zone to another
+
+https://cloud.google.com/compute/docs/instances/moving-instance-across-zones#moving_an_instance_manually
+
+=== Create schedule snapshots for your persistent disk
+
+> https://cloud.google.com/compute/docs/disks/scheduled-snapshots[Add a scheduled snapshot]
