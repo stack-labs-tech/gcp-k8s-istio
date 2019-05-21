@@ -1,0 +1,199 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    istio-injection: enabled
+  name: workshop
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: workshop
+  name: search
+  labels:
+    app: search
+spec:
+  ports:
+    - name: http
+      port: 8080
+  selector:
+    app: search
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: workshop
+  labels:
+    app: search
+    version: v1
+  name: search-v1
+spec:
+  selector:
+    matchLabels:
+      app: search
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: search
+        version: v1
+    spec:
+      containers:
+        - image: stacklabs/gke-and-istio-search:latest
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_CLOUD_GCP_LOGGING_PROJECT_ID
+              value: istio-csm
+            - name: SEARCH_VERSION
+              value: v1
+            - name: SEARCH_EVENT
+              value: "GKE + Istio Formation"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8181
+            initialDelaySeconds: 20
+          name: search
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: 1
+            limits:
+              memory: "512Mi"
+              cpu: 1
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: workshop
+  name: search
+spec:
+  hosts:
+    - search
+  http:
+    - route:
+        - destination:
+            host: search
+            subset: version-1
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  namespace: workshop
+  name: search
+spec:
+  host: search
+  subsets:
+    - name: version-1
+      labels:
+        version: v1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: workshop
+  name: ui
+  labels:
+    app: ui
+spec:
+  ports:
+    - name: http
+      port: 8080
+  selector:
+    app: ui
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: workshop
+  labels:
+    app: ui
+    version: v1
+  name: ui-v1
+spec:
+  selector:
+    matchLabels:
+      app: ui
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: ui
+
+        version: v1
+    spec:
+      containers:
+        - image: stacklabs/gke-and-istio-ui:latest
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_CLOUD_GCP_LOGGING_PROJECT_ID
+              value: istio-csm
+            - name: UI_VERSION
+              value: v1
+            - name: UI_SEARCHURL
+              value: http://search:8080/
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8181
+            initialDelaySeconds: 20
+          name: ui
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: 1
+            limits:
+              memory: "512Mi"
+              cpu: 1
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  namespace: workshop
+  name: ui
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  namespace: workshop
+  name: ui
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - ui
+  http:
+    - route:
+        - destination:
+            host: ui
+            subset: version-1
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  namespace: workshop
+  name: ui
+spec:
+  host: ui
+  subsets:
+    - name: version-1
+      labels:
+        version: v1

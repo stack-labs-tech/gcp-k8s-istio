@@ -9,7 +9,7 @@ We should run the following command to deploy applications in the cluster:
 
 [source, bash]
 ----
-Λ\:$ kub apply -f /Users/kevin/Workspace/gitlab.com/stack-labs/Training/gcp-k8s-istio/apps/istio/demo-hello-world.yaml
+Λ\:$ kub apply -f https://gitlab.com/snippets/1858919/raw
 namespace/workshop created
 service/search created
 deployment.apps/search created
