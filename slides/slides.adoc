@@ -31,5 +31,13 @@ include::01_k8s_scaling.adoc[]
 // Slides and demo on Cloud IAM
 include::03_cloud_iam.adoc[]
 
+// 03 - GCE
+// Creation of compute instances
+include::03_compute_engine.adoc[]
+
+// 03 - VPC
+// Creation of private networks
+include::03_virtual_private_cloud.adoc[]
+
 // 04 - GCP from withing GKE
 include::04_gcp_from_within_gke.adoc[]

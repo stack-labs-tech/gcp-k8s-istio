@@ -1,0 +1,91 @@
+
+=== Virtual Private Cloud
+
+* Similar to a physical network
+* VPCs are isolated from each other
+* Global, i.e. multi-regional
+
+=== VPC: Different objects
+
+* Projects
+* Networks
+* Subnetworks
+* Regions
+* Zones
+
+[%notitle]
+=== Virtual Private Cloud
+
+image::images/gcp-basics/vpc-overview-example.svg[background, size=contain]
+
+=== VPC: Different modes
+
+* Default
+* Auto mode
+* Custom mode
+
+=== VPC: Networks isolate systems
+
+image::images/gcp-basics/vpc-networks-isolate-systems.png[size=contain]
+
+=== VPC: Subnetworks cross zones
+
+image::images/gcp-basics/vpc-subnetwork-cross-zones.png[]
+
+=== VPC: The default network
+
+* Used for all resources by default
+* Contains a subnet for each GCP zone
+
+[%notitle]
+=== VPC: The default network
+
+image::images/gcp-basics/vpc-default-network.png[size=contain]
+
+=== VPC: Firewall rules
+
+> Which packets are allowed to travel to which destination
+
+* 1 virtual firewall per VPC
+* By default:
+** Block all incoming traffic
+** Allow all outgoing traffic
+** ... even internal traffic !
+
+=== VPC: Default network firewall rules
+
+* Allows internal traffic
+* Allows SSH, HTTP connections, etc.
+
+[%notitle]
+=== VPC: Default network firewall rules
+
+image::images/gcp-basics/vpc-default-network-firewall-rules.png[size=contain]
+
+=== VPC: Routes
+
+> How to send packets **from** an instance to a destination
+
+* To another resource inside the network
+* To the outside of GCP
+
+=== VPC: Default network routes
+
+* Subnet to subnet routes
+* Subnet to internet routes
+
+[%notitle]
+=== VPC: Default network routes
+
+image::images/gcp-basics/vpc-default-network-routes.png[size=contain]
+
+=== VPC: Forwarding rules
+
+> How to forward packets **to** a GCP resource
+
+* From outside GCP: external LB
+* From another resource: internal LB
+
+=== Practice time !
+
+Create a new VPC network
