@@ -1,2 +1,7 @@
 
 == GCP from within GKE
+
+=== GCP from within GKE: Plan
+
+* Connecting to a managed Redis
+* Connecting to a compute instance

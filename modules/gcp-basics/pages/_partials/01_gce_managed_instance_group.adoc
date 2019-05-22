@@ -82,7 +82,11 @@ Click on __Backend Configuration__ and fill as follow:
 
 image::compute-engine/lb-backend-config.png[]
 
-Then click on __Frontend configuration__ and under IP address, click __Reserve static address__:
+Then click on __Frontend configuration__ and under IP address as indicated here:
+
+image::compute-engine/lb-reserve-static-ip-access.png[]
+
+Then click __Reserve static address__:
 
 image::compute-engine/lb-reserve-static-ip.png[]
 

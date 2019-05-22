@@ -1,6 +1,12 @@
 
 == GCP basics
 
+=== GCP basics: Plan
+
+* Cloud IAM
+* Compute Engine
+* VPC Networks
+
 === IAM: Identity and Access Management
 
 **Who** > Can do **what** > on **which** resource
