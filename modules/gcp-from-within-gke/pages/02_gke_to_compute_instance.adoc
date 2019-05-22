@@ -56,7 +56,7 @@ We will simply a new environment variable called `NGINX_HOST` with the DNS name 
 ```
 env:
 - name: "NGINX_HOST"
-  value: "<REPLACE_WITH_YOUR_LB_INTERNAL_IP>"
+  value: "<REPLACE_WITH_YOUR_LB_DNS>"
 ```
 
 Replace this variable in the file `travel-manager-with-nginx-url.yaml` and then replace this deployment:

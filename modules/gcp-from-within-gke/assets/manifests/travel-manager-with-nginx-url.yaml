@@ -33,7 +33,7 @@ spec:
               memory: "256Mi"
           env:
             - name: "NGINX_HOST"
-              value: "<REPLACE_WITH_YOUR_LB_INTERNAL_IP>"
+              value: "<REPLACE_WITH_YOUR_LB_DNS>"
             - name: "REDIS_HOST"
               value: "<REPLACE_WITH_YOUR_INSTANCE_IP>"
             - name: "DISTANCE_CALCULATOR_URL"
