@@ -122,7 +122,7 @@ spec:
     spec:
       containers:
         - name: travel-manager
-          image: stacklabs/travel-manager:0.0.2
+          image: stacklabs/travel-manager:0.0.3
           imagePullPolicy: Always
           ports:
             - name: http

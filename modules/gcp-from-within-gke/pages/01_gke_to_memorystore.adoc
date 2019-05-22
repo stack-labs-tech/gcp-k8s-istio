@@ -74,7 +74,8 @@ gcloud beta container clusters create "kube-cluster" \
     --network "projects/${GCP_PROJECT}/global/networks/default" \
     --subnetwork "projects/${GCP_PROJECT}/regions/europe-west1/subnetworks/default" \
     --default-max-pods-per-node "110" \
-    --addons HorizontalPodAutoscaling,HttpLoadBalancing \
+    --addons HorizontalPodAutoscaling,HttpLoadBalancing,Istio \
+    --istio-config auth=MTLS_PERMISSIVE \
     --enable-autoupgrade \
     --enable-autorepair
 ```
@@ -108,7 +109,7 @@ cat manifests/istio-plan.yaml
 Note that the connection string to Redis is currently not set. You first need to edit the file and replace this variable. Look for `REDIS_HOST` environment variable:
 
 ```shell
-vim manifests/redis-service-entry.yaml
+vim manifests/istio-plan.yaml
 ```
 
 Once you replaced Redis connection string you can apply this complete plan:
